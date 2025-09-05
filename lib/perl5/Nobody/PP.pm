@@ -1,4 +1,6 @@
 package Nobody::PP;
+require Exporter;
+*import = \&Exporter::import;
 
 use strict;
 use common::sense;
@@ -6,20 +8,21 @@ use vars qw(@EXPORT @EXPORT_OK $VERSION $DEBUG %EXPORT_TAGS @subs);
 use Data::Dumper;
 BEGIN {
   *blessed=*builtin::blessed;
-};
-our(@subs);
-BEGIN {
   @subs=qw(dd ddx ee eex pp ppx quote qquote loc); 
 };
 use subs @subs;
-
 @EXPORT = @EXPORT_OK = @subs;
 %EXPORT_TAGS = ( 
   all=>[ @EXPORT_OK ],
 );
 
 sub qquote {
+  local ($Data::Dumper::Deparse, $Data::Dumper::Terse) = ( 1, 1 );
   return Data::Dumper::qquote(@_);
+};
+sub deparse {
+  local ($Data::Dumper::Deparse, $Data::Dumper::Terse) = ( 1, 1 );
+  return Data::Dumper::Dumper(@_);
 };
 sub ee {
   print STDERR pp(@_), "\n";
@@ -44,8 +47,6 @@ sub ddx {
 sub eex {
   say STDERR ppx(@_);
 };
-require Exporter;
-*import = \&Exporter::import;
 
 $VERSION = "1.25";
 $DEBUG = 0;
@@ -531,7 +532,7 @@ BEGIN {
       $out .= "}";
     }
     elsif ($type eq "CODE") {
-      $out = 'sub { ... }';
+      $out = deparse( $rval );
     }
     elsif ($type eq "VSTRING") {
       $out = sprintf +($ref ? '\v%vd' : 'v%vd'), $$rval;
@@ -553,5 +554,8 @@ BEGIN {
     return $out;
   }
 }
-
+unless(caller) {
+  deparse( \&ddx );
+  ddx( \&ddx );
+};
 1;

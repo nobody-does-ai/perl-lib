@@ -7,6 +7,13 @@ use strict;
 use warnings;
 no warnings 'experimental::builtin';
 use common::sense;
+use Path::Tiny;
+{
+  package Path::Tiny;
+  sub inode($) {
+    return [shift->stat]->[1];
+  };
+};
 sub file_id {
   die "useless use of file_id in void context" unless defined wantarray;
   local ($_)=shift;
@@ -221,7 +228,3 @@ ugly hacks, but saves him time.
 
 =cut
 1;
-
-unless(caller){
-  say for keys %Nobody::Util::;
-};

@@ -2,6 +2,7 @@
 # vim: ts=2 sw=2 ft=perl
 #
 package Nobody::Util;
+local($_);
 use Nobody::Util::Import;
 use strict;
 use warnings;
@@ -14,11 +15,28 @@ use Path::Tiny;
     return [shift->stat]->[1];
   };
 };
+sub safe_isa {
+  my ($self)=shift;
+  my ($class)=shift;
+  return undef unless ref($self);
+  return $self->isa($class);
+};
+sub safe_blessed {
+  my ($self)=shift;
+  return undef unless ref($self);
+  return blessed($self);
+};
+sub safe_can {
+  my($self)=shift;
+  my($meth)=shift;
+  return undef unless safe_blessed($self);
+  return $self->can($meth);
+};
 sub file_id {
   die "useless use of file_id in void context" unless defined wantarray;
   local ($_)=shift;
-  die "!defined" unless defined;
-  stat($_);
+  $_=path($_) unless ref($_);
+  $_->stat;
   my $file_id=sprintf("%016x:%016x",$st_dev,$st_ino);
   return $file_id;
 };

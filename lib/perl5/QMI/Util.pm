@@ -16,7 +16,7 @@ use IPC::Open3;
 use IO::Select;
 
 sub qmi_status {
-  local(@_)=map { split m{[\s']}} capture(qw(
+  local(@_)=map { split m{[\s']}} qmi_capture(qw(
     /opt/sbin/qmicli --wds-get-packet-service-status
   ));
   @_=grep { m{connected} } @_;

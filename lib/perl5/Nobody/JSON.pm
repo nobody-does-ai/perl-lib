@@ -2,7 +2,7 @@ package Nobody::JSON;
 use common::sense;
 require Exporter;
 our(@ISA) = qw(Exporter);
-our(@EXPORT) = qw( decode_json encode_json json_decode json_encode );
+our(@EXPORT) = ( qw( decode_json encode_json ));
 
 use JSON::XS qw(decode_json);
 our($coder);

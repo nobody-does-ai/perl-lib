@@ -27,7 +27,7 @@ BEGIN {
   pasteLines    serdate      class     mkref     
   open_fds      deparse      maybeRef           
   file_id       WNOHANG      uniq      matrix    
-  dirname       capture                         
+  dirname       capture                         safe_can
   );
   {
     my %subs;

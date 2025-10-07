@@ -32,6 +32,13 @@ sub safe_can {
   return undef unless safe_blessed($self);
   return $self->can($meth);
 };
+sub child_wait {
+  my ($kid);
+  do {
+    $kid=waitpid(0,0);
+    say STDERR "$kid returned $?" if $kid>1 and $?;
+  } while( $kid>1 );
+};
 sub file_id {
   die "useless use of file_id in void context" unless defined wantarray;
   local ($_)=shift;

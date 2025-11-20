@@ -9,6 +9,52 @@ use warnings;
 no warnings 'experimental::builtin';
 use common::sense;
 use Path::Tiny;
+sub open_fds(;$);
+BEGIN {
+  sub open_fds(;$) {
+    my ($dn) = "/proc/self/fd/";
+    if(@_ && $_[0]) {
+      map { $_, readlink "$dn$_" } open_fds();
+    } else {
+      opendir(my $dir,$dn);
+      my $no = fileno($dir);
+      grep { $_ ne '.' && $_ ne '..' && ($no-$_) } readdir($dir);
+    }
+  };
+  sub getcwd {
+    return readlink("/proc/self/cwd");
+  };
+};
+sub getfl(*) {
+  my($fh)=shift;
+  my($val);
+  fcntl($fh,F_GETFL,$val);
+  return $val;
+};
+sub setfl(*$) {
+  my ($fh)=shift;
+  my ($val)=shift;
+  fcntl($fh,F_SETFL,$val);
+};
+sub nonblock {
+  my ($fh)=shift;
+  if(!@_ || shift) {
+    setfl($fh,getfl($fh)|O_NONBLOCK);
+  };
+};
+sub getfds();
+BEGIN {
+  sub getfds() {
+    local(@_);
+    opendir(my $dir,"/proc/self/fd");
+    my $no = fileno($dir);
+    while(readdir($dir)){
+      push(@_,$_);
+    };
+    closedir($dir);
+    return @_;
+  };
+};
 {
   package Path::Tiny;
   sub inode($) {

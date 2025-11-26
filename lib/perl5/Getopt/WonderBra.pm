@@ -105,16 +105,13 @@ sub help {
 	exit @_ != 0;
 };
 sub rep_funcs {
-  local(@_)=@_;
 	die "missing main::help" unless exists &main::help;
 	die "missing main::version" unless exists &main::version;
-  $mainhelp//=main->can("help");
 	unless (defined($mainhelp)){
 		$mainhelp = \&main::help;
 		no warnings 'redefine';
 		*main::help=\&Getopt::WonderBra::help;
 	};
-  $mainver//=main->can("version");
 	unless (defined($mainver)){
 		$mainver = \&main::version;
 		no warnings 'redefine';
@@ -177,21 +174,13 @@ sub doubleopt($\@){
 }
 
 sub getopt($\@) {
-  local(@_)=@_;
-  my ($opts)=$_[0];
-  my ($args)=[@_[1..@_-1]];
-  $DB::single=1;
 	rep_funcs;
+	my ($opts,$args) = @_;
 	confess "Internal Error: Missing switch specifiers" unless @_;
 	parsefmt($opts);
 	local *_ = $args;
 	my @nonopts;
 	my @opts;
-  local(*_)=$args;
-  while(grep { ref($_)eq'ARRAY' } @_){
-    @_ = map { ref($_)eq'ARRAY'?@$_:$_ } @_;
-  };
-  confess "ref amongst the args?" if grep { ref } @_;
 	while(@_) {
 		confess "undef amongst the args?" unless defined($_ = shift);
 		if 		( !s/^-// ) 		{ push(@nonopts,$_); next; }
@@ -202,26 +191,5 @@ sub getopt($\@) {
 	};
 	return @opts, '--', @nonopts, @_;
 }
-sub selftest {
-  package main;
-  use Nobody::Util;
-  use common::sense;
-  *main::getopt=*Getopt::WonderBra::getopt;
-  eval {
-    sub help {
-      print "main help\n";
-    }
-    sub version {
-      print "main version\n";
-    };
-  };
-  die "$@" if "$@";
-  deparse( \&main::getopt );
-  eval {
-    $DB::single++;
-    local(@_)=qw( -a -b -c -d );
-    @_=getopt("abcd",@_);
-  };
-};
-selftest unless caller;
 1;
+

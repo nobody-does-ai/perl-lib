@@ -65,6 +65,7 @@ sub safe_isa {
   my ($self)=shift;
   my ($class)=shift;
   return undef unless ref($self);
+  return undef unless blessed($self);
   return $self->isa($class);
 };
 sub safe_blessed {
@@ -88,7 +89,9 @@ sub child_wait {
 sub file_id {
   die "useless use of file_id in void context" unless defined wantarray;
   local ($_)=shift;
+  return undef unless defined;
   $_=path($_) unless ref($_);
+  return undef unless $_->exists;
   $_->stat;
   my $file_id=sprintf("%016x:%016x",$st_dev,$st_ino);
   return $file_id;
@@ -101,8 +104,33 @@ sub flatten(@){
   return map { flatten($_) } @_ unless @_==1;
   local($_)=shift;
   return flatten(@$_) if reftype($_) eq 'ARRAY';
+  return flatten(%$_) if reftype($_) eq 'HASH';
   return $_;
 }
+#    sub recall {
+#      # Determine the sub's return type, and capture appropriately.
+#      if (wantarray) {
+#    
+#        # Called in array context. call sub and capture output.
+#        # DB::DB will recursively get control again if appropriate; we'll come
+#        # back here when the sub is finished.
+#        no strict 'refs';
+#        @ret = &$sub;
+#        return @res;
+#      }
+#      elsif ( defined wantarray ) {
+#        no strict 'refs';
+#        # Save the value if it's wanted at all.
+#        $ret = &$sub;
+#        return $res;
+#      }
+#      else {
+#        no strict 'refs';
+#        # Void return, explicitly.
+#        &$sub;
+#        undef $ret;
+#      }
+#    };
 sub class($){
   return ref||$_||'undef' for shift;
 };
@@ -216,8 +244,7 @@ sub methods {
 
     # Figure out the class - either this is the class or it's a reference
     # to something blessed into that class.
-    my $class = shift;
-    $class = ref $class if ref $class;
+    my $class = class(shift);
 
     local %seen;
 
@@ -241,7 +268,7 @@ higher in the C<@ISA> tree, 0 if we should stop.
 sub methods_via {
 
     # If we've processed this class already, just quit.
-    my $class = shift;
+    my $class = class(shift);
     return if $seen{$class}++;
 
     # This is a package that is contributing the methods we're about to print.
@@ -289,7 +316,7 @@ sub methods_via {
 1;
 =head1 NAME
 
-Nobody::Util - Pretty printing of data structures
+Nobody::Util - Utilities Nobody Uses
 
 =head1 SYNOPSIS
 

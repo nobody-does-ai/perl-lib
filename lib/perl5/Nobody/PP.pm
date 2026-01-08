@@ -349,7 +349,7 @@ BEGIN {
       $pclass = $class;
       $pidx = @$idx;
     }
-
+    {
     if (defined $out) {
       # keep it
     }
@@ -534,13 +534,21 @@ BEGIN {
     elsif ($type eq "CODE") {
       $out = deparse( $rval );
     }
+    elsif ($type eq "LVALUE" ) {
+      my($rval)=$rval;
+      $out=_pp($rval);
+    }
     elsif ($type eq "VSTRING") {
       $out = sprintf +($ref ? '\v%vd' : 'v%vd'), $$rval;
     }
+
+    #===
     else {
       warn "Can't handle $type data";
       $out = "'#$type#'";
     }
+    #===
+  }
 
     if ($class && $ref) {
       $out = "bless($out, " . quote($class) . ")";
@@ -555,7 +563,8 @@ BEGIN {
   }
 }
 unless(caller) {
-  deparse( \&ddx );
-  ddx( \&ddx );
+  ddx( substr("deparse",2,5) );
+#      deparse( \&ddx );
+#      ddx( \&ddx );
 };
 1;

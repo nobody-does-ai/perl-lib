@@ -1,4 +1,4 @@
-package Poison;
+package Tie::Poison;
 sub TIESCALAR {
   my $s;
   return bless(\$s);
@@ -19,7 +19,7 @@ my $callers=sub {
   while(1){
     my (@caller)=caller($num++);
     last unless @caller;
-    next if $caller[0] eq 'Poison';
+    next if $caller[0] eq 'Tie::Poison';
     $caller[3]=$AUTOLOAD if $caller[3] eq 'Poison::AUTOLOAD';
     push(@_,join(":",splice(@caller,1,3)));
   }

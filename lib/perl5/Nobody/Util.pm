@@ -2,29 +2,49 @@
 # vim: ts=2 sw=2 ft=perl
 #
 package Nobody::Util;
-local($_);
+use common::sense;
 use Nobody::Util::Import;
+our(@EXPORT,@ISA);
+local($_);
+use Carp qw(carp confess cluck croak);
+use File::stat qw( :FIELDS );
 use strict;
 use warnings;
 no warnings 'experimental::builtin';
-use common::sense;
-use Path::Tiny;
-sub open_fds(;$);
-BEGIN {
-  sub open_fds(;$) {
-    my ($dn) = "/proc/self/fd/";
-    if(@_ && $_[0]) {
-      map { $_, readlink "$dn$_" } open_fds();
-    } else {
-      opendir(my $dir,$dn);
-      my $no = fileno($dir);
-      grep { $_ ne '.' && $_ ne '..' && ($no-$_) } readdir($dir);
-    }
+use Nobody::PP;
+sub child_wait; sub class($); sub deparse; sub file_id; sub flatten(@);
+sub getcwd; sub getfds(); sub getfl(*); sub lsort; sub maybeRef($);
+sub methods; sub methods_via; sub nonblock; sub open_fds(;$); sub pasteLines(@);
+sub print_methods; sub safe_blessed; sub safe_can; sub safe_isa; sub serdate(;$);
+sub serial_maker(%); sub setfl(*$); sub uri; sub vcmp; sub vsort;
+
+sub pad {
+  local(@_)=@_;
+  my($max)=List::Util::max(map { length } @_);
+  for(@_) {
+    $_=join("",$_,'.'x($max-length));
   };
-  sub getcwd {
+  @_;
+};
+sub open_fds(;$) {
+  my ($dn) = "/proc/self/fd/";
+  if(@_ && $_[0]) {
+    map { $_, readlink "$dn$_" } open_fds();
+  } else {
+    opendir(my $dir,$dn);
+    my $no = fileno($dir);
+    grep { $_ ne '.' && $_ ne '..' && ($no-$_) } readdir($dir);
+  }
+};
+BEGIN {
+  sub getcwd;
+};
+BEGIN {
+  no warnings 'redefine';
+  *getcwd=sub {
     return readlink("/proc/self/cwd");
   };
-};
+}
 sub getfl(*) {
   my($fh)=shift;
   my($val);
@@ -55,12 +75,6 @@ BEGIN {
     return @_;
   };
 };
-{
-  package Path::Tiny;
-  sub inode($) {
-    return [shift->stat]->[1];
-  };
-};
 sub safe_isa {
   my ($self)=shift;
   my ($class)=shift;
@@ -83,7 +97,7 @@ sub child_wait {
   my ($kid);
   do {
     $kid=waitpid(0,0);
-    say STDERR "$kid returned $?" if $kid>1 and $?;
+    warn "$kid returned $?" if $kid>1 and $?;
   } while( $kid>1 );
 };
 sub file_id {
@@ -96,10 +110,6 @@ sub file_id {
   my $file_id=sprintf("%016x:%016x",$st_dev,$st_ino);
   return $file_id;
 };
-{
-  package Null;
-};
-sub flatten(@);
 sub flatten(@){
   return map { flatten($_) } @_ unless @_==1;
   local($_)=shift;
@@ -325,4 +335,6 @@ Nobody made it because Nobody is as lazy as he is.  It's full of
 ugly hacks, but saves him time.
 
 =cut
+use Nobody::Util::Import;
+use Nobody::Util::Path;
 1;

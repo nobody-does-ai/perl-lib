@@ -6,16 +6,15 @@ package Nobody::Util::Import;
 package Nobody::Util;
 use Nobody::PP;
 our(@EXPORT);
+use vars ( 
+  qw( @carp %PACK @EXPORT  @EXPORT_OK  @ISA %seen @subs)
+);
 BEGIN {
   local($_,@_);
-  use vars ( 
-    qw( @carp %PACK @EXPORT  @EXPORT_OK  @ISA %seen)
-  );
-  our(%PACK, @subs);
   @subs=qw(
   QX            WNOHANG      avg       class     
   deparse       dirname      file_id   flatten   
-  getcwd        getfds       getfl     lcmp      
+  getfds       getfl     lcmp      
   lsort         matrix       max       maybeRef  
   methods       methods_via  min       mkdir_p   
   pasteLines    nonblock     open_fds  mkref     
@@ -136,8 +135,6 @@ BEGIN {
   use base qw( Exporter );
 };
 package Nobody::Util::Import;
-our(@ISA);
-@ISA=@ISA=qw(isa);
 close(DATA);
 1;
 __DATA__

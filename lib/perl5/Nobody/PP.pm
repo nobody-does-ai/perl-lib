@@ -8,7 +8,7 @@ use vars qw(@EXPORT @EXPORT_OK $VERSION $DEBUG %EXPORT_TAGS @subs);
 use Data::Dumper;
 BEGIN {
   *blessed=*builtin::blessed;
-  @subs=qw(dd ddx ee eex pp ppx quote qquote loc trace); 
+  @subs=qw(dd ddx ee eex pp ppx quote qquote loc); 
 };
 use subs @subs;
 @EXPORT = @EXPORT_OK = @subs;
@@ -30,15 +30,6 @@ sub ee {
 sub dd {
   print pp(@_), "\n";
 }
-sub trace {
-  my($idx)=0;
-  my($pkg, $file, $line);
-  my(@trace);
-  while( ($pkg,$file,$line)=caller($idx++) ) {
-    push(@trace,join(":",$file,$line,$pkg,$idx));
-  };
-  say STDERR for @trace;
-};
 sub loc {
   my($idx)=0;
   my($pkg, $file, $line);
@@ -65,7 +56,6 @@ use vars qw(%seen %refcnt @dump @fixup %require $TRY_BASE64  $INDENT $LINEWIDTH)
 
 $TRY_BASE64 = 50 unless defined $TRY_BASE64;
 $INDENT = "  " unless defined $INDENT;
-$LINEWIDTH=$ENV{COLUMNS}-2;
 $LINEWIDTH = 60 unless defined $LINEWIDTH;
 
 sub pp

@@ -3,8 +3,10 @@
 #
 use common::sense;
 package Nobody::Util::Import;
+push(@Nobody::Util::ISA,__PACKAGE__);
 package Nobody::Util;
 use Nobody::PP;
+our(@ISA);
 our(@EXPORT);
 BEGIN {
   local($_,@_);
@@ -137,7 +139,6 @@ BEGIN {
 };
 package Nobody::Util::Import;
 our(@ISA);
-@ISA=@ISA=qw(isa);
 close(DATA);
 1;
 __DATA__

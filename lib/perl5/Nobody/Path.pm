@@ -1,11 +1,14 @@
-package Nobody::Util::Path;
+package Nobody::Path;
 use Nobody::Util::Import;
 require Exporter;
 our(@ISA) = qw(Exporter);
 package Nobody::Util;
 use Path::Tiny;
+use Mojo::Path;
+push(@Path::Tiny::ISA,__PACKAGE__);
+push(@Mojo::Path::ISA,__PACKAGE__);
 
-package Path::Tiny;
+
 use File::stat ();
 sub mtime($) {
   shift->stat;

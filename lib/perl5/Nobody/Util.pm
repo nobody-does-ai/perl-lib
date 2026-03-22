@@ -336,5 +336,5 @@ ugly hacks, but saves him time.
 
 =cut
 use Nobody::Util::Import;
-use Nobody::Util::Path;
+use Nobody::Path;
 1;

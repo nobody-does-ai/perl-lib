@@ -4,6 +4,3 @@
 [submodule "file-at"]
 	path = src/file-at
 	url = ./file-at/
-[submodule "perl-lib"]
-	path = perl-lib
-	url = ../perl-lib

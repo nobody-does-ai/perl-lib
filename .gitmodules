@@ -1,6 +1,0 @@
-[submodule "posix-at"]
-	path = src/posix-at
-	url = ./posix-at/
-[submodule "file-at"]
-	path = src/file-at
-	url = ./file-at/

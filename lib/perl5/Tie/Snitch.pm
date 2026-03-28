@@ -2,10 +2,7 @@ package Tie::Snitch;
 use common::sense;
 use Tie::Array;
 use Data::Dump ();
-my($log);
 BEGIN {
-  open($log,">/tmp/$>.snitch.log");
-  $log->autoflush(1);
   STDOUT->autoflush(1);
 };
 our($AUTOLOAD);
@@ -48,11 +45,7 @@ sub AUTOLOAD {
 
 unless(caller) {
   package main;
-  sub say(@){
-    $log->say(join(":",__FILE__,__LINE__,Data::Dump::pp(\@_)));
-  };
   say join(":",__FILE__,__LINE__,"msg2");
-  use Data::Dump qw(pp dd ddx);
   our($s,@a,%h);
 #      tie $s,'Tie::Snitch';
   tie @a,'Tie::Snitch';
@@ -61,7 +54,7 @@ unless(caller) {
   push(@a,'array','array');
   $h{key1}='value1';
   $h{key2}='value2'; 
-  STDERR->say( pp \( $s, @a, %h ) );
+  STDERR->say( \$s, \@a, \%h );
   STDERR->say( map { $_, $a[$_] } keys @a );
   STDERR->say( map { $_, $h{$_} } keys %h );
 };

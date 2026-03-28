@@ -1,29 +1,70 @@
 package Tie::Snitch;
+use common::sense;
 use Tie::Array;
-our(@ISA)=qw(Tie::StdArray);
-#qw( TIEARRAY  FETCHSIZE STORESIZE STORE     FETCH     CLEAR     POP       PUSH      SHIFT     UNSHIFT   EXISTS    DELETE    SPLICE     );
+use Data::Dump ();
+my($log);
 BEGIN {
-	package X;
-	use Nobody::Util;
+  open($log,">/tmp/$>.snitch.log");
+  $log->autoflush(1);
+  STDOUT->autoflush(1);
 };
-sub  x{
-  my(@args) = map { "$_" } @_;
+our($AUTOLOAD);
+my(%other)=qw( pp 1 ppx 1 dd 1 ddx 1 );
+sub AUTOLOAD {
+  my($pkg,$sub)=map { m{(.*)::(.*)} } $AUTOLOAD;
+  my($data);
+  if(0){
+  } elsif ($sub eq 'pp') {
+    return Data::Dump::pp(@_);
+  } elsif ($sub eq 'dd') {
+    return Data::Dump::dd(@_);
+  } elsif ($sub eq 'ddx') {
+    return Data::Dump::ddx(@_);
+  } elsif ( $sub eq 'TIESCALAR' ) {
+    require Tie::StdScalar;
+    my($scalar);
+    tie $scalar, 'Tie::StdScalar';
+    $data={ref=>\$scalar,imp=>tied $scalar};
+    return bless($data,__PACKAGE__);
+  } elsif($sub eq 'TIEARRAY') {
+    require Tie::StdArray;
+    my(@array);
+    tie @array, 'Tie::StdArray';
+    $data={ref=>\@array,imp=>tied @array};
+    return bless($data,__PACKAGE__);
+  } elsif ( $sub eq 'TIEHASH' ) {
+    require Tie::StdHash;
+    my(%hash);
+    tie %hash, 'Tie::Snitch';
+    $data={ref=>\%hash,imp=>tied %hash};
+    return bless($data,__PACKAGE__);
+  } else {
+    return if $sub eq "CLEAR";
+    $data=shift;
+    return $data->{imp}->$sub(@_);
+  };
+  die "no return above( $pkg $sub @_ )";
+};
 
-  X::eex([caller(1)]->[3],[@args]);
+unless(caller) {
+  package main;
+  sub say(@){
+    $log->say(join(":",__FILE__,__LINE__,Data::Dump::pp(\@_)));
+  };
+  say join(":",__FILE__,__LINE__,"msg2");
+  use Data::Dump qw(pp dd ddx);
+  our($s,@a,%h);
+#      tie $s,'Tie::Snitch';
+  tie @a,'Tie::Snitch';
+  tie %h,'Tie::Snitch';
+  $s="scalar";
+  push(@a,'array','array');
+  $h{key1}='value1';
+  $h{key2}='value2'; 
+  STDERR->say( pp \( $s, @a, %h ) );
+  STDERR->say( map { $_, $a[$_] } keys @a );
+  STDERR->say( map { $_, $h{$_} } keys %h );
 };
-sub  TIEARRAY   {x(@_);  goto  \&Tie::StdArray::TIEARRAY;   };
-sub  FETCHSIZE  {x(@_);  goto  \&Tie::StdArray::FETCHSIZE;  };
-sub  STORESIZE  {x(@_);  goto  \&Tie::StdArray::STORESIZE;  };
-sub  STORE      {x(@_);  goto  \&Tie::StdArray::STORE;      };
-sub  FETCH      {x(@_);  goto  \&Tie::StdArray::FETCH;      };
-sub  CLEAR      {x(@_);  goto  \&Tie::StdArray::CLEAR;      };
-sub  POP        {x(@_);  goto  \&Tie::StdArray::POP;        };
-sub  PUSH       {x(@_);  goto  \&Tie::StdArray::PUSH;       };
-sub  SHIFT      {x(@_);  goto  \&Tie::StdArray::SHIFT;      };
-sub  UNSHIFT    {x(@_);  goto  \&Tie::StdArray::UNSHIFT;    };
-sub  EXISTS     {x(@_);  goto  \&Tie::StdArray::EXISTS;     };
-sub  DELETE     {x(@_);  goto  \&Tie::StdArray::DELETE;     };
-sub  SPLICE     {x(@_);  goto  \&Tie::StdArray::SPLICE;     };
 1;
 
 

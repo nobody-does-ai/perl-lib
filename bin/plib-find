@@ -1,0 +1,67 @@
+#!/usr/bin/perl
+# vim: ts=2 sw=2 ft=perl
+eval 'exec perl -x -wS $0 ${1+"$@"}'
+  if 0;
+use autodie;
+use common::sense;
+use Time::HiRes;
+use Path::Tiny;
+use Path::Tiny qw(path);
+use Nobody::Util;
+use Getopt::WonderBra;
+my (%opts) = ( skipgit=>1 );
+sub pfind(@);
+sub dir_filter(@);
+#ddx( [ dir_filter( qw( xxx/.git ) ) ] );
+sub dir_filter(@) {
+  return map { dir_filter($_) } @_ unless (@_)==1;
+  local($_)=shift;
+  return () if m{(^|/)[.][.]?$};
+  return $_ unless $opts{skipgit}; 
+  return () if m{(^|/)(CVS|\.git)$};
+  return $_;
+};
+die "zero length path" if grep { !length } @ARGV;
+
+open(STDOUT,"|gather|column -t");
+for(@INC) {
+  pfind($_);
+};
+close(STDOUT);
+
+pfind(@ARGV);
+our(%opts);
+exit(0);
+sub file_filter {
+  grep { m{[.]pm$} } @_;
+};
+sub filter {
+  my (@d,@f);
+  for(@_) {
+    if(-d) {
+      push(@d,$_);
+    } else {
+      push(@f,$_);
+    };
+  };
+  @d=dir_filter(@d);
+  @f=file_filter(@f);
+  return \@d,\@f;
+};
+sub pfind(@) {
+  my ($top) = $_[0];
+  while(@_){
+    local($_)=shift;
+    $_=path($_) unless ref;
+    if( -d ) {
+      my $file_id=file_id($_);
+      state(%seen);
+      next if $seen{$file_id}++;
+      my ($d,$f) = filter($_->children, \@_);
+      @_=(@$d,@_,@$f);
+    } else {
+      local($,)=" ";
+      say $_->relative($top), $top;
+    };
+  };
+};

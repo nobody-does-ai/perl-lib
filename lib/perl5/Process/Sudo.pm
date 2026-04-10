@@ -6,7 +6,7 @@ use warnings;
 
 our $VERSION = '1.001';
 
-use Exporter 'import';
+use Exporter ();
 our @EXPORT_OK   = qw(sudo);
 our @EXPORT      = qw(sudo);   # default export
 

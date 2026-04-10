@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use File::Slurp;
 use Encode;
-use Nobody::Util;
 use File::Find::Rule::Filesys::Virtual;
 use HTTP::Date qw(time2str time2isoz);
 use HTTP::Headers;
@@ -16,7 +15,7 @@ use XML::LibXML;
 use XML::LibXML::XPathContext;
 use Net::DAV::LockManager ();
 use Net::DAV::LockManager::DB ();
-
+BEGIN { undef &head; };
 our $VERSION = '1.304';
 $VERSION = eval $VERSION;  # convert development version into a simpler version number.
 

@@ -1,0 +1,7 @@
+Unicode-NoFancyPants-0.001.tar.gz
+out
+*.out
+*.log
+Unicode-NoFancyPants-*
+
+.build

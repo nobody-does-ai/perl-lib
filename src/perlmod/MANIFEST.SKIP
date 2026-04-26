@@ -1,0 +1,16 @@
+MYMETA.json
+MYMETA.yml
+Makefile
+[.]git/
+.*\.bs
+.*\.[oc]
+pm_to_blib
+blib
+.gdb_history
+tmp
+Makefile.old
+lib
+man
+posix-at-2
+.*\.sock
+.*\.bak

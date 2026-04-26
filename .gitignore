@@ -1,7 +1,8 @@
-hide
 *.tgz
-Makefile.PL
-pm_to_blib
-blib
-tmp
+MYMETA.json
+MYMETA.yml
 Makefile
+blib
+hide
+pm_to_blib
+tmp

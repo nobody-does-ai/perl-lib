@@ -6,3 +6,6 @@ blib
 hide
 pm_to_blib
 tmp
+lib
+share
+man

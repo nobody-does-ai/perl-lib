@@ -1,31 +1,87 @@
 package Nobody::JSON;
-use FindBin qw($RealBin);
-use lib "$RealBin/../lib", "$RealBin/lib";
-use Nobody::Auto qw( common::sense JSON::XS );
-use common::sense;
-require Exporter;
-our @ISA = qw(Exporter);
-our $VERSION = '0.01';
-
-our @EXPORT    = qw( encode_json decode_json );
-our @EXPORT_OK = qw( encode_json decode_json json_encode json_decode );
+our @EXPORT    = qw( json );
+our @EXPORT_OK = qw( encode_json decode_json );
 our %EXPORT_TAGS = ( all => [ @EXPORT_OK ] );
-
-use JSON::XS qw( decode_json );
+BEGIN {
+  *import=\&Exporter::import;
+}
+use Exporter;
+use FindBin qw($RealBin);
+use Nobody::Util;
+use Carp::Always;
+use JSON::XS;
+use common::sense;
+our $VERSION = '0.01';
 
 # Lazy-initialised encoder configured for maximum readability:
 # - ascii: escape non-ASCII so output is safe in any context
 # - pretty: human-readable indented output
 # - allow_nonref: encode bare scalars, not just objects/arrays
-my $coder;
-sub _coder { $coder //= JSON::XS->new->ascii->pretty->allow_nonref }
-
-sub encode_json { _coder()->encode(shift) }
-
-# Aliases matching the JSON::XS naming convention
-*json_encode = \&encode_json;
-*json_decode = \&decode_json;
-
+INIT {
+  sub new {
+    my($class)=class(shift);
+    my($json)=JSON::XS->new;
+    $json->ascii;
+    $json->encode(1);
+    $json->canonical(1);
+    $json->pretty;
+    $json->allow_nonref;
+    $json->allow_blessed;
+    $json->convert_blessed;
+    my($self)=bless([$json],$class);
+    $self;
+  }; 
+};
+sub json {
+  local(@_)=@_;
+  state($json);
+  unless(defined($json)){
+    $json=Nobody::JSON->new;
+  };
+  $json;
+};
+sub load {
+  die "you can't do that!" unless safe_can($_[0],"load");
+  die "usage: json->load( path(x) )" unless (
+    @_==2 and ref($_[1])
+  );
+  local(@_)=@_;
+  my($self)=shift;
+  my($src)=shift;
+  my $txt=$src->slurp;
+  my $obj=$self->decode($txt);
+  $obj;
+};
+sub save {
+  die "you can't do that!" unless safe_can($_[0],"save");
+  my($self)=shift;
+  die "too many args" if @_>2;
+  my($dst)=shift;
+  local($_)=$self->encode($_[0]);
+  $dst->spew($_);
+};
+sub json_encode {
+  local(@_)=@_;
+  json->encode(@_);
+};
+sub json_decode {
+  local(@_)=@_;
+  json->decode(@_);
+};
+sub encode_json($) { json->encode(shift) }
+sub decode_json($) {  json->decode(shift) }
+sub encode {
+  local(@_)=@_;
+  die "you can't do that!" unless safe_can($_[0],"encode");
+  my($self)=shift;
+  $self->[0]->encode(@_);
+};
+sub decode {
+  die "you can't do that!" unless safe_can($_[0],"decode");
+  local(@_)=@_;
+  my($self)=shift;
+  $self->[0]->decode("@_");
+}
 1;
 
 =head1 NAME

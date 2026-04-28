@@ -6,7 +6,7 @@ WriteMakefile(
     PREREQ_PM         => { 'Test::More' => 0 },
     ABSTRACT_FROM     => 'Slots.pm',
     AUTHOR            => 'Rich Paul <paulr@cpan.org>',
-    LIBS              => ['Slots.so'], 
+    LIBS              => 'Slots.so', 
     DEFINE            => '', 
     INC               => '-I.', 
 );

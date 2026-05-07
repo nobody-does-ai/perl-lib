@@ -4,7 +4,7 @@ use Test::More;
 use lib 't/lib', 'lib';
 
 use_ok('Nobody::JSON');
-
+eval "use Nobody::JSON qw(encode_json decode_json)";
 can_ok('Nobody::JSON', qw(encode_json decode_json));
 
 my $data = { key => "value", list => [1, 2, 3] };

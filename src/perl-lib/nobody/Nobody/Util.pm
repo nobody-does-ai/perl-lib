@@ -16,6 +16,24 @@ use Carp @Carp::EXPORT_OK;
 sub serdate;
 my($count);
 BEGIN { $count=100 };
+sub find {
+  local(@_)=@_;
+  my(@r);
+  my(@d)=grep { -d $_[$_] } keys @_;
+  my(@f)=grep { !-d $_[$_] } keys @_;
+  @_=@_[@d,@f];
+  while(@_ and -d $_[0]){
+    local($_)=path(shift);
+    if(-d) {
+      my(@tmp)=$_->children();
+      unshift(@_,grep { -d } @tmp);
+      push(@_,grep { !-d } @tmp);
+    } else {
+      push(@_,$_);
+    };
+  };
+  @_;
+};
 sub add_use {
   die "usage: add_use(str,str)" unless @_==2;
   my($pkg)=shift;

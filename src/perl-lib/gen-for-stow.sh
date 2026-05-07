@@ -6,11 +6,10 @@ cd ..
 cd ..
 cd ..
 dir1=$(basename $PWD)
-echo $dir1 >
 
-#    if $( basename $PWD ) == "stow"; then
-#      echo -Mlocal::lib=$PWD
-#    fi
+  if test $( basename $PWD ) == "stow"; then
+   echo -Mlocal::lib=$PWD/perl-lib
+  fi
 }
 
-echo perl $(dir) Makefile.PL
+perl $(dir) Makefile.PL

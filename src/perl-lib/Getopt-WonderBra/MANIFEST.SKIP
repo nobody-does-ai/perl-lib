@@ -1,4 +1,1 @@
-[.]tar$
-[.]tar[.]gz$
-[.]tgz$
-tmp$
+../MANIFEST.SKIP

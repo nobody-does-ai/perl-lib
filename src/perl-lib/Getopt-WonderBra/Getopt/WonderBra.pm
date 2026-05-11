@@ -76,7 +76,7 @@ STDOUT will always be selected.
 
 package Getopt::WonderBra;
 use strict;
-our($VERSION)="1.04";
+our($VERSION)="1.05";
 
 
 use strict;

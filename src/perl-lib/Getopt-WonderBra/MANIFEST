@@ -1,10 +1,16 @@
+.cvsignore
 Changes
-GNUmakefile
-Getopt/WonderBra.pm
-MANIFEST			This list of files
-META.yml
-Makefile.PL
-README
 eg/WonderBra.pl
+Getopt/WonderBra.pm
+GNUmakefile
+Makefile
+Makefile.PL
+MANIFEST
+MANIFEST.bak
+MANIFEST.SKIP
+META.yml
+MYMETA.json
+MYMETA.yml
+README
 t/00_useok.t
 t/01_wonderbra.t

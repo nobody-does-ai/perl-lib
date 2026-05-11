@@ -28,4 +28,4 @@ $(builds): %_build: % %/Makefile
 build: $(builds)
 
 stow: build
-	cd ../../.. && stow perl-lib
+	cd ../.. && mkdir -p share && mv man share && cd .. && pwd && test $$(basename $$PWD) == stow && stow perl-lib

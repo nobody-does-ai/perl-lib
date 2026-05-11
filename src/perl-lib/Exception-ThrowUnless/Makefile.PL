@@ -5,6 +5,6 @@ my $mod =   'Exception/ThrowUnless.pm';
 WriteMakefile (
 	NAME          =>  q(Exception::ThrowUnless),
 	VERSION_FROM  =>  $mod,
-	AUTHOR        =>  q(Rich Paul <turing-test@rich-paul.net>)
+	AUTHOR        =>  q(Rich Paul <rpaul@cpan.org>)
 );
 

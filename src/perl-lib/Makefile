@@ -12,11 +12,11 @@ subs+= posix-at
 export subs
 makefiles:=$(patsubst %,%/Makefile,$(subs))
 builds:=	$(patsubst %,%_build,$(subs))
-#$(foreach b,$(builds),$(warning $b))
+PERL5LIB:=$(PWD)/nobody
 all: stow
-
+base=$(shell cd ../.. && pwd)
 $(makefiles): %/Makefile: %/Makefile.PL
-	cd $(dir $@) && perl -Mlocal::lib=/opt/stow Makefile.PL INSTALLDIRS=perl
+	cd $(dir $@) && perl -Mlocal::lib=$(base) Makefile.PL INSTALLDIRS=perl
 
 config: $(makefiles)
 

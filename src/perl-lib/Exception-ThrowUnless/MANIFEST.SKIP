@@ -1,7 +1,1 @@
-[.]tar$
-[.]tar[.]gz$
-[.]tgz$
-[0-9]/$
-tmp$
-MAKEFILE$
-[.]bak$
+../MANIFEST.SKIP

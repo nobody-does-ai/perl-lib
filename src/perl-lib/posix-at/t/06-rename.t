@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use File::Temp qw(tempdir);
 use Fcntl qw(O_RDONLY O_WRONLY O_CREAT O_DIRECTORY);
-use POSIX qw(close);
 use POSIX::At qw( AT_FDCWD RENAME_NOREPLACE openat renameat renameat2 );
 
 BEGIN {
@@ -44,5 +43,5 @@ SKIP: {
       "renameat2 RENAME_NOREPLACE succeeds when dst absent" );
 }
 
-close($base_fd);
+$base_fd->close;
 done_testing();

@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use File::Temp qw(tempdir);
 use Fcntl qw(:mode O_RDONLY O_WRONLY O_CREAT O_DIRECTORY);
-use POSIX qw(close);
 use FFI::Platypus::Memory qw(malloc free);
 use FFI::Platypus::Buffer qw(scalar_to_pointer);
 use POSIX::At qw(
@@ -71,5 +70,5 @@ SKIP: {
   is( $rc, 0, "mknodat created regular file" );
 }
 
-close($base_fd);
+$base_fd->close;
 done_testing();

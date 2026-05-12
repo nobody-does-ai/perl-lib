@@ -5,7 +5,6 @@ use warnings;
 use Test::More tests => 5;
 use File::Temp qw(tempdir);
 use Fcntl qw(O_RDONLY O_WRONLY O_CREAT O_DIRECTORY);
-use POSIX qw(close write);
 use FFI::Platypus::Memory  qw(malloc free);
 use FFI::Platypus::Buffer  qw(buffer_to_scalar);
 use POSIX::At qw( AT_FDCWD openat unlinkat linkat symlinkat readlinkat );
@@ -20,7 +19,7 @@ my $base_fd = openat( AT_FDCWD, $tmp, O_RDONLY | O_DIRECTORY, 0 );
 
 # Create a source file
 my $ffd = openat( $base_fd, "src.txt", O_CREAT | O_WRONLY, 0644 );
-write( $ffd, "data\n", 5 );
+syswrite( $ffd, "data\n", 5 );
 close($ffd);
 
 # linkat
@@ -42,4 +41,4 @@ free($ptr);
 ok( $n > 0, "readlinkat returned positive byte count" );
 is( $tgt, "src.txt", "readlinkat content matches symlink target" );
 
-close($base_fd);
+$base_fd->close;

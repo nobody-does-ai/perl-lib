@@ -4,7 +4,7 @@ use warnings;
 use lib ".";
 use Test::More;
 use Fcntl qw(:DEFAULT :mode);
-use POSIX qw(R_OK W_OK X_OK F_OK close);
+use POSIX qw(R_OK W_OK X_OK F_OK);
 use POSIX::At qw(
     AT_FDCWD AT_REMOVEDIR AT_SYMLINK_NOFOLLOW AT_EACCESS
     openat fstatat unlinkat mkdirat mknodat mkfifoat
@@ -17,16 +17,17 @@ use File::Basename qw(dirname);
 # Create a temporary directory for all tests
 my $tmpdir = tempdir(CLEANUP => 1);
 my $dirfd = openat(AT_FDCWD, $tmpdir, O_RDONLY | O_DIRECTORY, 0);
-ok($dirfd >= 0, 'opened temp directory fd') or BAIL_OUT("Cannot open tmpdir: $!");
+isa_ok($dirfd, 'IO::Dir', 'opened temp directory handle')
+    or BAIL_OUT("Cannot open tmpdir: $!");
 
 # Test 1: openat - create a file
 my $fd1 = openat($dirfd, "file1.txt", O_CREAT | O_WRONLY | O_TRUNC, 0644);
-ok($fd1 >= 0, 'openat: created file1.txt');
-POSIX::close($fd1) if $fd1 >= 0;
+isa_ok($fd1, 'IO::File', 'openat: created file1.txt');
+close($fd1) if $fd1;
 
 # Test 2: fstatat - stat the file we just created
 SKIP: {
-    skip "file1.txt not created", 1 unless $fd1 >= 0;
+    skip "file1.txt not created", 1 unless $fd1;
     # fstatat requires an actual pointer; for now just test that it doesn't crash
     # (proper stat buffer handling requires FFI::C or pack/unpack magic)
     my $buf = POSIX::Structs::Stat->new;
@@ -48,14 +49,14 @@ SKIP: {
 
 # Test 5: faccessat - check accessibility
 SKIP: {
-    skip "file1.txt not created", 1 unless $fd1 >= 0;
+    skip "file1.txt not created", 1 unless $fd1;
     $ret = faccessat($dirfd, "file1.txt", R_OK, 0);
     ok($ret == 0, 'faccessat: file1.txt is readable');
 }
 
 # Test 6: linkat - create hard link
 SKIP: {
-    skip "file1.txt not created", 1 unless $fd1 >= 0;
+    skip "file1.txt not created", 1 unless $fd1;
     $ret = linkat($dirfd, "file1.txt", $dirfd, "file1_link.txt", 0);
     ok($ret == 0, 'linkat: created hard link file1_link.txt');
 }
@@ -76,7 +77,7 @@ SKIP: {
 
 # Test 9: renameat - rename a file
 SKIP: {
-    skip "file1.txt not created", 1 unless $fd1 >= 0;
+    skip "file1.txt not created", 1 unless $fd1;
     $ret = renameat($dirfd, "file1.txt", $dirfd, "file1_renamed.txt");
     ok($ret == 0, 'renameat: renamed file1.txt to file1_renamed.txt');
 }
@@ -86,8 +87,8 @@ SKIP: {
     skip "renameat2 not available", 1 unless POSIX::At->can('renameat2');
     # Create a test file first
     my $fd = openat($dirfd, "file2.txt", O_CREAT | O_WRONLY, 0644);
-    POSIX::close($fd) if $fd >= 0;
-    skip "file2.txt not created", 1 unless $fd >= 0;
+    close($fd) if $fd;
+    skip "file2.txt not created", 1 unless $fd;
 
     $ret = renameat2($dirfd, "file2.txt", $dirfd, "file2_renamed.txt", 0);
     ok($ret == 0, 'renameat2: renamed file2.txt');
@@ -142,7 +143,7 @@ SKIP: {
     ok($ret == 0, 'unlinkat: removed directory with AT_REMOVEDIR');
 }
 
-# Close directory fd
-POSIX::close($dirfd);
+# Close directory handle
+$dirfd->close;
 
 done_testing();

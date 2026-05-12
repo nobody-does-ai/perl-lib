@@ -5,7 +5,7 @@ use warnings;
 use Test::More tests => 4;
 use File::Temp qw(tempdir);
 use File::Spec;
-use POSIX qw(S_ISDIR close);
+use POSIX qw(S_ISDIR);
 use Fcntl qw(O_RDONLY O_DIRECTORY);
 use POSIX::Structs;
 use POSIX::At qw( AT_FDCWD openat mkdirat fstatat faccessat );
@@ -31,4 +31,4 @@ ok( S_ISDIR( $st->st_mode ), "fstatat: st_mode indicates directory" );
 # faccessat
 is( faccessat( $base_fd, "testdir", R_OK | X_OK, 0 ), 0, "faccessat R_OK|X_OK on testdir" );
 
-close($base_fd);
+$base_fd->close;

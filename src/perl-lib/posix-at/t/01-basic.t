@@ -16,13 +16,14 @@ if (POSIX::At->can('openat')) {
     eval {
         require Fcntl;
         my $tmp = "t_basic_tmp_$$.txt";
-        my $fd  = POSIX::At::openat(
+        my $fh  = POSIX::At::openat(
             POSIX::At::AT_FDCWD(),
             $tmp,
             Fcntl::O_CREAT() | Fcntl::O_WRONLY() | Fcntl::O_TRUNC(),
             0644,
         );
-        ok($fd >= 0, 'openat returned a non-negative fd');
+        isa_ok($fh, 'IO::File', 'openat returned a file handle');
+        close($fh) if $fh;
 
         # clean up
         POSIX::At::unlinkat(POSIX::At::AT_FDCWD(), $tmp, 0);

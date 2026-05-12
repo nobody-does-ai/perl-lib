@@ -1,25 +1,28 @@
-File::At
-========
+POSIX::At
+=========
 
-File::At is a thin FFI::Platypus wrapper around the POSIX "at" family of
+POSIX::At is a thin FFI::Platypus wrapper around the POSIX "at" family of
 filesystem syscalls (openat, fstatat, unlinkat, mkdirat, linkat, etc.).
 
 It exposes:
 
 - constants like AT_FDCWD, AT_SYMLINK_NOFOLLOW, AT_REMOVEDIR, ...
 - direct bindings to the underlying libc functions
-- convenience helpers open_fd_at() and open_fh_at() for opening files
-  relative to a directory fd
+- openat() as a Perl-friendly wrapper returning IO::File or IO::Dir
+  objects while still accepting those objects as dirfd arguments
 
 Typical usage:
 
-  use File::At qw(open_fh_at AT_FDCWD);
-  use Fcntl qw(O_RDONLY);
+  use POSIX::At qw(openat AT_FDCWD);
+  use Fcntl qw(O_RDONLY O_DIRECTORY);
 
-  my $fh = open_fh_at(AT_FDCWD, "subdir/file.txt", O_RDONLY, 0);
+  my $dir = openat(AT_FDCWD, "subdir", O_RDONLY | O_DIRECTORY, 0)
+    or die "openat subdir: $!";
 
-See eg/at_hardlink.pl for a more complete example: it walks two directory
-trees and, when files match by MD5, replaces the destination file with a
-hard link to the source using linkat().
+  my $fh = openat($dir, "file.txt", O_RDONLY, 0)
+    or die "openat file.txt: $!";
+
+See eg/rsync_at.pl for a more complete example of walking directory handles
+and copying files with the *at() calls.
 
 ----

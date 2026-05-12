@@ -1,5 +1,11 @@
 Revision history for File-At
 
+Next
+    - Changed openat to return IO::File or IO::Dir objects instead of raw
+      file descriptor integers.
+    - Updated opendirat, symlinkat, tests, and examples to accept the new
+      handle-returning openat behavior.
+
 0.01  2025-11-09
     - Initial release.
     - Thin FFI bindings for the POSIX *at() filesystem syscalls.

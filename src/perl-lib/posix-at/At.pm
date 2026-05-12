@@ -10,6 +10,9 @@ use POSIX::Structs qw( ffi
 use Fcntl qw(:DEFAULT :mode);
 use Exporter 'import';
 use Carp qw( carp croak confess cluck verbose longmess shortmess );
+use IO::Dir ();
+use IO::File ();
+use POSIX ();
 use vars qw(@EXPORT @EXPORT_OK %EXPORT_TAGS);
 our $VERSION = '0.01';
 
@@ -119,7 +122,7 @@ BEGIN {
   ###############################################################################
   #
   #
-  attach( openat => ['dirfd','string','int','mode_t'] => 'int' );
+  attach( [ openat => '_openat' ] => ['dirfd','string','int','mode_t'] => 'int' );
 
   # int fstatat(int dirfd, const char *pathname, struct stat *buf, int flags);
   attach( fstatat => ['dirfd','string','stat_t','int'] => 'int' );
@@ -150,7 +153,7 @@ BEGIN {
   attach( linkat => ['dirfd','string','dirfd','string','int'] => 'int' );
 
   # int symlinkat(const char *target, int newdirfd, const char *linkpath);
-  attach( symlinkat => ['string','int','string'] => 'int' );
+  attach( symlinkat => ['string','dirfd','string'] => 'int' );
 
   # int renameat(int olddirfd, const char *oldpath,
   #              int newdirfd, const char *newpath);
@@ -170,20 +173,74 @@ BEGIN {
 
 }
 
-# opendirat($dirfd, $name) -> ($fd, $dh)
-# Opens $name relative to $dirfd and returns both the raw fd (for further
-# *at() calls) and a Perl dirhandle (for readdir).  The caller is responsible
-# for closing both when done.  /proc/self/fd is the bridge between the two
-# worlds: openat speaks fd, Perl's opendir speaks path.
+# openat($dirfd, $name, $flags, $mode) -> IO::File|IO::Dir|undef
+#
+# libc openat returns a raw file descriptor.  The public Perl API returns an
+# owning handle instead; the dirfd custom type above accepts those handles for
+# subsequent *at() calls via fileno().
 use constant O_DIRECTORY => 0200000;
+sub _fdopen_mode {
+  my ($flags) = @_;
+  my $accmode = $flags & O_ACCMODE;
+
+  return ($accmode == O_RDWR)
+    ? (($flags & O_APPEND) ? 'a+' : 'r+')
+    : ($accmode == O_WRONLY)
+      ? (($flags & O_APPEND) ? 'a' : 'w')
+      : 'r';
+}
+
+sub openat {
+  my ($dirfd, $name, $flags, $mode) = @_;
+  $mode //= 0;
+
+  my $fd = _openat($dirfd, $name, $flags, $mode);
+  return undef if $fd < 0;
+
+  my @st = POSIX::fstat($fd);
+  unless (@st) {
+    my $err = $!;
+    POSIX::close($fd);
+    $! = $err;
+    return undef;
+  }
+
+  if (S_ISDIR($st[2])) {
+    my $dh = IO::Dir->new("/proc/self/fd/$fd");
+    my $err = $!;
+    POSIX::close($fd);
+    unless ($dh) {
+      $! = $err;
+      return undef;
+    }
+    return $dh;
+  }
+
+  my $fh = IO::File->new_from_fd($fd, _fdopen_mode($flags));
+  unless ($fh) {
+    my $err = $!;
+    POSIX::close($fd);
+    $! = $err;
+    return undef;
+  }
+
+  return $fh;
+}
+
+# opendirat($dirfd, $name) -> IO::Dir
+# opendirat($path) -> IO::Dir
+#
+# In list context this returns the same IO::Dir twice so older callers that
+# split the result into "fd" and "dirhandle" slots still have a usable dirfd.
 sub opendirat {
   my ($dirfd, $name) = @_;
-  my $fd = openat($dirfd, $name, Fcntl::O_RDONLY() | O_DIRECTORY, 0);
-  eex($fd);
-  croak "opendirat $name: $!" if $fd < 0;
-  opendir(my $dh, "/proc/self/fd/$fd") or croak "opendirat opendir $name: $!";
-  eex($dh);
-  return ($fd, $dh);
+  ($dirfd, $name) = (AT_FDCWD, $dirfd) unless defined $name;
+
+  my $dh = openat($dirfd, $name, Fcntl::O_RDONLY() | O_DIRECTORY, 0);
+  croak "opendirat $name: $!" unless defined $dh;
+  croak "opendirat $name: not a directory" unless eval { $dh->isa('IO::Dir') };
+
+  return wantarray ? ($dh, $dh) : $dh;
 }
 
 BEGIN {
@@ -207,17 +264,18 @@ POSIX::At - FFI bindings to the POSIX *at() family of filesystem syscalls
   use POSIX::Structs qw( POSIX::Structs::Stat );
   use Fcntl qw(O_RDONLY O_CREAT O_WRONLY O_DIRECTORY);
 
-  # Open a directory fd
-  my $dirfd = openat(AT_FDCWD, "/some/base", O_RDONLY|O_DIRECTORY, 0);
+  # Open a directory handle; *at calls accept it anywhere a dirfd is needed.
+  my $dir = openat(AT_FDCWD, "/some/base", O_RDONLY|O_DIRECTORY, 0)
+    or die "openat: $!";
 
   # Stat a file relative to that directory
   my $st = POSIX::Structs::Stat->new;
-  fstatat($dirfd, "foo.txt", $st, 0) == 0
+  fstatat($dir, "foo.txt", $st, 0) == 0
     or die "fstatat: $!";
   printf "mode=0%o size=%d\n", $st->st_mode & 07777, $st->st_size;
 
   # Unlink relative to that directory
-  unlinkat($dirfd, "old.txt", 0) == 0
+  unlinkat($dir, "old.txt", 0) == 0
     or die "unlinkat: $!";
 
 =head1 DESCRIPTION
@@ -229,13 +287,16 @@ Struct arguments (e.g. for C<fstatat>) use types defined in
 L<POSIX::Structs>, which must be loaded separately.  Both modules share
 a single L<FFI::Platypus> instance via C<POSIX::Structs::ffi()>.
 
-The bindings follow C semantics intentionally:
+The bindings mostly follow C semantics intentionally:
 
 =over 4
 
-=item * Functions return -1 on error; check C<$!> for the reason.
+=item * C<openat> returns an C<IO::File> or C<IO::Dir> object on success,
+or C<undef> on error; check C<$!> for the reason.
 
-=item * No automatic Perl magic or exception throwing.
+=item * Other functions return -1 on error; check C<$!> for the reason.
+
+=item * No exception throwing.
 
 =back
 
@@ -250,10 +311,10 @@ The following may be imported by name:
   AT_EACCESS AT_REMOVEDIR AT_EMPTY_PATH
   RENAME_NOREPLACE RENAME_EXCHANGE RENAME_WHITEOUT
 
-  # Raw syscall bindings
+  # Bindings and helpers
   openat fstatat unlinkat mkdirat mknodat mkfifoat
   fchmodat fchownat utimensat linkat symlinkat readlinkat
-  renameat renameat2 faccessat futimesat
+  renameat renameat2 faccessat futimesat opendirat
 
 C<renameat2> and C<futimesat> are silently absent on platforms where the
 underlying libc does not provide them.

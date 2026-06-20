@@ -7,7 +7,6 @@ subs+= LWP-Protocol-virtual
 subs+= Module-Gather
 subs+= Symbol-Slots
 subs+= Unicode-NoFancyPants
-subs+= nobody
 subs+= posix-at
 export subs
 makefiles:=$(patsubst %,%/Makefile,$(subs))
@@ -21,6 +20,7 @@ $(makefiles): %/Makefile: %/Makefile.PL
 config: $(makefiles)
 
 $(builds): %_build: % %/Makefile
+	cpanm Nobody::Util
 	cd $(patsubst %_build,%,$@) && make
 	cd $(patsubst %_build,%,$@) && make test
 	cd $(patsubst %_build,%,$@) && make install
@@ -28,4 +28,4 @@ $(builds): %_build: % %/Makefile
 build: $(builds)
 
 stow: build
-	cd ../.. && mkdir -p share && mv man share && cd .. && pwd && test $$(basename $$PWD) == stow && stow perl-lib
+	cd ../.. && rm -fr share/man && mkdir -p share && mv man share && cd .. && pwd && test $$(basename $$PWD) == stow && stow perl-lib

@@ -1,7 +1,7 @@
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    NAME             => 'Nobody-Util',
+    NAME             => 'Nobody::Util',
     AUTHOR           => 'Rich Paul <rpaul@cpan.org>',
     VERSION_FROM     => 'Nobody/Util.pm',
     ABSTRACT         => 'Utility modules used by Nobody (but useful to everybody)',

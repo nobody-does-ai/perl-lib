@@ -7,7 +7,7 @@ subs+= LWP-Protocol-virtual
 subs+= Module-Gather
 subs+= Symbol-Slots
 subs+= Unicode-NoFancyPants
-subs+= posix-at
+subs+= POSIX-At
 export subs
 makefiles:=$(patsubst %,%/Makefile,$(subs))
 builds:=	$(patsubst %,%_build,$(subs))

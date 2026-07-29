@@ -1,0 +1,64 @@
+#!/usr/bin/perl
+# vim: ts=2 sw=2 ft=perl
+eval 'exec perl -x -wS $0 ${1+"$@"}'
+  if 0;
+$|++;
+use utf8;
+use open ':std', ':encoding(UTF-8)';
+use common::sense;
+use autodie;
+use Nobody::Util;
+use Nobody::Auto qw( FFI::Platypus Term::ReadLine::Gnu AnyEvent );
+
+our(@VERSION) = qw( 0 1 0 );
+my(%mod);
+sub mod_to_pkg {
+  while(<DATA>){
+    $mod{$_}=package($mod{$_});
+  }
+};
+__DATA__
+./src/perl-lib/Unicode-NoFancyPants/blib/lib/Unicode/NoFancyPants.pm
+./src/perl-lib/Unicode-NoFancyPants/lib/Unicode/NoFancyPants.pm
+./src/perl-lib/Exception-ThrowUnless/Exception/ThrowUnless.pm
+./src/perl-lib/Module-Gather/blib/lib/Module/Gather.pm
+./src/perl-lib/Module-Gather/Gather.pm
+./src/perl-lib/Make-Task/Make/Task.pm
+./src/perl-lib/LWP-Protocol-virtual/blib/lib/LWP/Protocol/virtual.pm
+./src/perl-lib/LWP-Protocol-virtual/blib/lib/URI/virtual.pm
+./src/perl-lib/LWP-Protocol-virtual/lib/LWP/Protocol/virtual.pm
+./src/perl-lib/LWP-Protocol-virtual/lib/URI/virtual.pm
+./src/perl-lib/Getopt-WonderBra/Getopt/WonderBra.pm
+./src/perl-lib/Symbol-Slots/Slots.pm
+./src/perl-lib/Symbol-Slots/blib/lib/Symbol/Slots.pm
+./src/perl-lib/IO-PSelect/IO/PSelect.pm
+./src/perl-lib/POSIX-At/At.pm
+./src/perl-lib/POSIX-At/Structs.pm
+./src/perl-lib/POSIX-At/blib/lib/POSIX/At.pm
+./src/perl-lib/POSIX-At/blib/lib/POSIX/Structs.pm
+./src/perl-lib/POSIX-At/POSIX/At.pm
+./src/perl-lib/POSIX-At/POSIX/Structs.pm
+./src/perl-lib/Nobody-Util/Nobody/Auto.pm
+./src/perl-lib/Nobody-Util/Nobody/Util.pm
+./src/perl-lib/Nobody-Util/Nobody/PP.pm
+./src/perl-lib/Nobody-Util/Nobody/JSON.pm
+./src/perl-lib/Nobody-Util/Nobody/Exes.pm
+./src/perl-lib/Nobody-Util/Tie/ArrayNoNull.pm
+./src/perl-lib/blib/lib/LWP/Protocol/virtual.pm
+./src/perl-lib/blib/lib/Exception/ThrowUnless.pm
+./src/perl-lib/blib/lib/Symbol/Slots.pm
+./src/perl-lib/blib/lib/Getopt/WonderBra.pm
+./src/perl-lib/blib/lib/Unicode/NoFancyPants.pm
+./src/perl-lib/blib/lib/POSIX/At.pm
+./src/perl-lib/blib/lib/POSIX/Structs.pm
+./src/perl-lib/blib/lib/URI/virtual.pm
+./src/perl-lib/Sudo/Process/Sudo.pm
+./lib/perl5/x86_64-linux-gnu-thread-multi/Symbol/Slots.pm
+./lib/perl5/LWP/Protocol/virtual.pm
+./lib/perl5/Exception/ThrowUnless.pm
+./lib/perl5/Symbol/Slots.pm
+./lib/perl5/Getopt/WonderBra.pm
+./lib/perl5/Unicode/NoFancyPants.pm
+./lib/perl5/POSIX/At.pm
+./lib/perl5/POSIX/Structs.pm
+./lib/perl5/URI/virtual.pm

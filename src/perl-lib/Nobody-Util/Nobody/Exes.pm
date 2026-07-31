@@ -1,4 +1,5 @@
 package Nobody::Exes;
+use Nobody::PP;
 require Exporter;
 our(@EXPORT);
 BEGIN {
@@ -31,6 +32,6 @@ sub editor {
   $res{$_}=++$found for path_find(exe(),\@_,@PATH);
   sort {$res{$a}<=>$res{$b}} keys %res;
 };
-unless(caller){
-  eex path_find(exe(), "sh",@PATH);
-};
+#    unless(caller){
+#      eex path_find(exe(), "sh",@PATH);
+#    };

@@ -1,8 +1,8 @@
+#!/usr/bin/perl
+# vim: ts=2 sw=2 ft=perl
 package Nobody::Auto;
-use strict;
-use warnings;
-
-our $VERSION = '0.01';
+use Nobody::Util;
+use Nobody::PP;
 
 # Nobody::Auto - auto-install missing CPAN modules at runtime.
 #
@@ -36,7 +36,7 @@ sub import {
 
         # Not found - install via cpanm
         warn "Nobody::Auto: $mod not found, installing via cpanm...\n";
-        my $rc = system('cpanm', '--notest', '--quiet', $mod);
+        my $rc = system('cpanm', '--notest', $mod);
         if ($rc != 0) {
             die "Nobody::Auto: cpanm failed to install $mod (exit $rc)\n";
         }

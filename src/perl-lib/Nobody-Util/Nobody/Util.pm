@@ -1,93 +1,105 @@
 #!/usr/bin/perl
 # vim: ts=2 sw=2 ft=perl
 package Nobody::Util;
-our (@ISA,@EXPORT,@EXPORT_OK,%EXPORT_TAGS,%EXP);
-BEGIN {
-  @ISA = qw(Exporter);
+use Data::Dumper;
+sub Nobody::PP::import {
+  print Dumper(\@EXPORT),"\n";
 };
-BEGIN { STDOUT->autoflush(1); }
-use common::sense;
-use Path::Tiny;
 use Nobody::PP;
-use Import::Into;
-my(%use);
+use Nobody::PP @Nobody::PP::EXPORT;
+BEGIN {
+  our(@call);
+  our(@key,@val)=qw(
+  $package $filename $line $subroutine $hasargs
+  $wantarray $evaltext $is_require $hints $bitmask $hinthash
+  );
+  sub xcaller {
+    my(%call);
+    @call{@key}=caller(scalar(keys %call));
+    \%call;
+  };
+}
+use vars qw ( @ISA @EXPORT %EXP);
+use FindBin qw($Dir $Script);
+use Carp::Always;
 use Carp;
 use Carp @Carp::EXPORT_OK;
-sub serdate;
-my($count);
-BEGIN { $count=100 };
+
+sub serdate(;$);
+sub paths {
+  return map { path($_) } @_;
+};
+BEGIN {
+  push(@EXPORT,qw(chomped));
+};
+sub chomped {
+  local(@_)=@_;
+  chomp(@_);
+  @_;
+};
+sub grep2(&\@){
+  my($pred)=shift;
+  my($y,$n)=([],[]);
+  for my $key(keys @{$_[0]}){
+    for($_[0]->[$key]) {
+      my($a)=$pred->()?$y:$n;
+      push(@{$a},$_);
+    };
+  };
+  @{$_[0]}=@$n;
+  @$y;
+};
+our(%arg);
+sub args {
+  local(%arg);
+  while(@_){
+    local($_)=shift;
+    if(ref($_) eq 'HASH') {
+      unshift(@_,%$_);
+    } elsif(ref($_) eq 'ARRAY') {
+      unshift(@_,@$_);
+    } elsif(ref($_)) {
+      die "bad ref: $_";
+    } else {
+      push(@{$arg{$_}},shift);
+    };
+  };
+  \%arg;
+};
 sub find {
   local(@_)=@_;
+  local(*arg)=args(@_);
   my(@r);
   my(@d)=grep { -d $_[$_] } keys @_;
   my(@f)=grep { !-d $_[$_] } keys @_;
   @_=@_[@d,@f];
   while(@_ and -d $_[0]){
     local($_)=path(shift);
-    if(-d) {
-      my(@tmp)=$_->children();
-      unshift(@_,grep { -d } @tmp);
-      push(@_,grep { !-d } @tmp);
-    } else {
-      push(@_,$_);
-    };
+    my(@tmp)=$_->children();
+    unshift(@_,grep { -d } @tmp);
+    push(@_,grep { !-d } @tmp);
   };
   @_;
 };
-sub add_use {
-  die "usage: add_use(str,str)" unless @_==2;
-  my($pkg)=shift;
-  die "$pkg done" if defined $use{$pkg};
-  $use{$pkg}=shift;
-  eval "use $pkg";
-  my(@arr)=eval "$use{$pkg}";
-  push(@EXPORT,@arr);
-  for( "use $pkg $use{$pkg};" ) {
-    eval;
-    warn "($_)\n$@" if "$@";
-  };
-};
-BEGIN {
-  no strict 'subs';
-  add_use( Fcntl        =>   '@Fcntl::EXPORT_OK' );
-  add_use( File::stat   =>   '@File::stat::EXPORT_OK' );
-  add_use( FindBin  =>    'qw( $Bin $RealBin $Script $RealScript $Dir )' );
-  add_use( Import::Into => '@Import::Into::EXPORT_OK' );
-  add_use( List::Util   => '@List::Util::EXPORT_OK' );
-  add_use( Nobody::PP => '@Nobody::PP::EXPORT_OK' );
-  add_use( POSIX        =>   'qw( strftime mktime ) ' );
-  add_use( Path::Tiny   =>   'qw( path ) ' );
-  add_use( Scalar::Util => '@Scalar::Util::EXPORT_OK' );
-  add_use( Sub::Util    => '( grep { $_ ne "set_prototype" } @Sub::Util::EXPORT_OK )' );
-  add_use( common::sense=> '' );
-  add_use( strict=>'' );
-  add_use( warnings=>'' );
-};
-BEGIN {
-  if ($] >= 5.036) {
-    warnings->unimport('experimental::builtin');
-  }
-}
+our $VERSION = '0.01';
 
-our $VERSION = '0.02';
-
-# ---------------------------------------------------------------------------
-# Exporter setup
-# ---------------------------------------------------------------------------
-require Exporter;
 BEGIN {
   push(@EXPORT , qw(
-    avg         basename    child_wait  class
-    deparse     dirname     file_id     flatten
-    getcwd      getfds      getfl       lcmp
-    lsort       max         maybeRef    methods
-    methods_via min         mkref       nonblock
-    open_fds    pad         pasteLines  safe_blessed
-    safe_can    safe_isa    serdate     serial_maker
-    setfl       sum         uniq        uri
-    vcmp        vsort exports
-    path pp ppx dd ddx ee eex
-    ));
+    avg          basename      carp        child_wait
+    class        cluck         confess     croak
+    deparse      dirname       exports     file_id
+    find         flatten       getcwd      getfds
+    getfl        grep2         loc         lcmp
+    lsort        max           maybeRef    methods
+    methods_via  min           mkref       nonblock
+    open_fds     pad           pasteLines  path
+    pp           safe_blessed  safe_can    safe_isa
+    serdate      serial_maker  setfl       sum
+    uniq         uri           vcmp        vsort
+    newer        older         paths       vcmp
+    vsort        Dumper                    
+    )
+  );
 }
 
 # Re-export everything available from these modules.
@@ -95,6 +107,7 @@ BEGIN {
 # a new function, it automatically becomes available here.
 sub exports {
   return { exports(@_) } unless wantarray;
+  eex( [ 'exports(', ')' ] );
   my($pkg)=shift;
   unless(defined($pkg)) {
     my(@inc);
@@ -108,17 +121,15 @@ sub exports {
     EXPORT_OK=>\@{${$pkg.'::'}{EXPORT_OK}},
     EXPORT_TAGS=>\%{${$pkg.'::'}{EXPORT_TAGS}}
   };
+#      eex( { pkg=>$pkg, EXP=>\%EX{ } );
   return defined($pkg)?($pkg=>$EXP{$pkg}):(%EXP);
-};
-BEGIN {
-  @EXPORT_OK=@EXPORT;
-  %EXPORT_TAGS = ( all => [ @EXPORT_OK ] );
-  require Exporter;
 };
 sub import {
   use Import::Into;
-  shift->export_to_level(1);
+  my($pkg)=caller;
+  my($obj)=shift;
   common::sense->import::into(1);
+  goto \&Exporter::import;
 };
 
 
@@ -162,15 +173,6 @@ sub setfl(*$) {
   my ($val) = shift;
   fcntl($fh, F_SETFL, $val);
 }
-sub bits {
-  my($v)=int(shift);
-  local(@_)=$v;
-  while($v) {
-    push(@_,($v&1));
-    $v>>=1;
-  };
-  reverse @_;
-};
 sub nonblock(*;$) {
   my ($fh) = shift;
   my ($o)=getfl($fh);
@@ -184,18 +186,34 @@ sub nonblock(*;$) {
   };
   setfl($fh,$n);
 }
-
 # ---------------------------------------------------------------------------
 # Object / reference utilities
 # ---------------------------------------------------------------------------
 
 sub class($) {
-  return ref || $_ || 'undef' for shift;
+  my ($thing) = @_;
+  my $class = ref($thing) || $thing || 'undef';
+  return $class unless wantarray;
+  return ($class, ref($thing) && reftype($thing) eq "HASH" ? { %$thing } : {});
 }
 
+sub refcount {
+  ret_cnt(@_);
+};
+sub ref_cnt {
+  local(@_)=@_;
+  die pp([@_]) if grep {!ref} @_;
+  local(@_)=@_;
+  my(%ref);
+  for(@_){
+    $ref{ref($_)}++;
+  };
+  \%ref;
+};
 sub safe_isa {
   my ($self)  = shift;
   my ($class) = shift;
+  return 1 if eval { $self->isa($class) };
   return undef unless ref($self);
   return undef unless blessed($self);
   return $self->isa($class);
@@ -219,7 +237,7 @@ sub mkref {
 }
 
 sub maybeRef($) {
-  die "use class, not maybeRef";
+  carp "use class, not maybeRef";
   goto \&class;
 }
 
@@ -311,6 +329,16 @@ sub child_wait {
 # File utilities
 # ---------------------------------------------------------------------------
 
+sub newer {
+  my $t = (stat shift)[9];
+  return !!grep { $t > (stat $_)[9] } @_;
+}
+
+sub older {
+  my $t = (stat shift)[9];
+  return !!grep { $t < (stat $_)[9] } @_;
+}
+
 sub file_id {
   die "useless use of file_id in void context" unless defined wantarray;
   local ($_) = shift;
@@ -352,7 +380,7 @@ sub serial_maker(%) {
         } elsif ($!{EEXIST}) {
           ++$num;
         } else {
-          die "mkdir:$res{fn}:$!";
+          confess "mkdir:$res{fn}:$!";
         }
       } else {
         if (sysopen($res{fh}, $res{fn}, Fcntl::O_CREAT | Fcntl::O_EXCL())) {
@@ -360,7 +388,7 @@ sub serial_maker(%) {
         } elsif ($!{EEXIST}) {
           ++$num;
         } else {
-          die "sysopen:$res{fn}:$!";
+          confess "sysopen:$res{fn}:$!";
         }
       }
     }
@@ -442,9 +470,10 @@ of Perl development by Rich Paul (CPAN: NOBODY).  It is, as the name
 suggests, full of things that nobody else does — but that save time.
 
 The module re-exports commonly needed symbols from C<Carp>, C<List::Util>,
-C<Scalar::Util>, C<Sub::Util>, C<POSIX>, C<Fcntl>, C<Path::Tiny>, and
+C<Scalar::Util>, C<Sub::Util>, C<POSIX>, C<Fcntl>, C<Nobody::Path>, and
 C<FindBin> so that most scripts need only C<use Nobody::Util> to get a
 useful working environment.
+
 
 =head1 EXPORTED BY DEFAULT
 
@@ -494,7 +523,10 @@ Sets C<O_NONBLOCK> on C<$fh>.
 =item class( $thing )
 
 Returns C<ref($thing)> if it is a reference, C<$thing> itself if it is a
-plain string (class name), or C<'undef'> if it is undefined.
+plain string (class name), or C<'undef'> if it is undefined. In list context,
+returns the class name followed by a shallow hash clone for hash-backed
+objects, suitable for constructors that accept either a class or a same-type
+object.
 
 =item safe_isa( $obj, $class )
 
@@ -630,3 +662,18 @@ This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
 =cut
+
+#    sub to_prefix {
+#      my($bin)=path($Dir);
+#      if($bin->basename eq "bin"){
+#        $bin=$bin->parent;
+#      };
+#      chdir($bin);
+#      if(-d "lib/perl5") {
+#        eval "use lib 'lib/perl5';";
+#      };
+#      if(-d "lib") {
+#        eval "use lib 'lib';";
+#      };
+#    };
+1;

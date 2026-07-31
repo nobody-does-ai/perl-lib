@@ -11,11 +11,15 @@ subs+= POSIX-At
 export subs
 makefiles:=$(patsubst %,%/Makefile,$(subs))
 builds:=	$(patsubst %,%_build,$(subs))
-PERL5LIB:=$(PWD)/nobody
+PERL5LIB:=$(PWD)/Nobody-Util:$(PERL5LIB)
+export PERL5LIB
+
 all: stow
 base=$(shell cd ../.. && pwd)
 $(makefiles): %/Makefile: %/Makefile.PL
 	cd $(dir $@) && perl -Mlocal::lib=$(base) Makefile.PL INSTALLDIRS=perl
+	${MAKE} -C Nobody-Util all
+${MAKE} -C Nobody::Util; 
 
 config: $(makefiles)
 

@@ -1,39 +1,40 @@
 package Nobody::PP;
-require Exporter;
-*import = \&Exporter::import;
-
-use FindBin qw($RealBin);
-use lib "$RealBin/../lib", "$RealBin/lib";
-use Nobody::Auto qw( common::sense );
-use strict;
-use common::sense;
-use vars qw(@EXPORT @EXPORT_OK $VERSION $DEBUG %EXPORT_TAGS @subs);
 use Data::Dumper;
-use Scalar::Util qw(blessed);
-BEGIN {
-  # blessed imported from Scalar::Util above (builtin::blessed requires perl 5.36+)
-  @subs=qw(dd ddx ee eex pp ppx quote qquote loc); 
-};
-use subs @subs;
-@EXPORT = @EXPORT_OK = @subs;
-%EXPORT_TAGS = ( 
-  all=>[ @EXPORT_OK ],
-);
 
-sub qquote {
-  local ($Data::Dumper::Deparse, $Data::Dumper::Terse) = ( 1, 1 );
-  return Data::Dumper::qquote(@_);
+BEGIN { print Dumper(\%INC)."\n\n"; };
+use vars qw($VERSION $DEBUG @vars @EXPORT);
+use vars qw(%seen %refcnt @dump @fixup %require $TRY_BASE64  $INDENT $LINEWIDTH);
+BEGIN {
+  my(@sub)=qw(dd ddx ee eex pp ppx quote qquote loc);
+  eval "sub $_ { ; };";
+  push(@EXPORT,@sub);
 };
-sub deparse {
-  local ($Data::Dumper::Deparse, $Data::Dumper::Terse) = ( 1, 1 );
-  return Data::Dumper::Dumper(@_);
+
+BEGIN {
+  $DB::single=1;
+#      my(@eex);
+#      sub eex { push(@eex,[@_]); eex Nobody::PP::pp(\@eex); };
 };
-sub ee {
-  print STDERR pp(@_), "\n";
-}
-sub dd {
-  print pp(@_), "\n";
-}
+
+use Data::Dumper;
+use FindBin qw($RealBin);
+use Nobody::Util;
+use Scalar::Util qw(blessed);
+use feature 'say';
+use overload ();
+
+BEGIN {
+  our(@vars);
+
+  $VERSION = "1.25";
+  $DEBUG = 0;
+
+
+  $TRY_BASE64 = 5000 unless defined $TRY_BASE64;
+  $INDENT = " " unless defined $INDENT;
+  $LINEWIDTH = $ENV{COLUMNS};
+};
+
 sub loc {
   my($idx)=0;
   my($pkg, $file, $line);
@@ -42,26 +43,27 @@ sub loc {
   } while($pkg eq 'Nobody::PP');
   join(':',$file,$line,"@_");
 };
+sub qquote {
+  return Data::Dumper::qquote(@_);
+};
+sub deparse {
+  local ($Data::Dumper::Deparse, $Data::Dumper::Terse) = ( 1, 1 );
+  return Data::Dumper::Dumper(@_);
+};
+sub ddx { say STDOUT ppx(@_); }
+sub eex { say STDOUT ppx(@_); }
 sub ppx {
   return loc(pp(@_));
 }
-sub ddx {
-  say STDOUT ppx(@_);
-}
-sub eex {
-  say STDERR ppx(@_);
+sub ee  { say STDERR pp(@_); }
+sub dd  { say STDOUT pp(@_); }
+
+
+sub _pp
+{
+  use Nobody::Util;
+  Dumper(\@_);
 };
-
-$VERSION = "1.25";
-$DEBUG = 0;
-
-use overload ();
-use vars qw(%seen %refcnt @dump @fixup %require $TRY_BASE64  $INDENT $LINEWIDTH);
-
-$TRY_BASE64 = 50 unless defined $TRY_BASE64;
-$INDENT = "  " unless defined $INDENT;
-$LINEWIDTH = 60 unless defined $LINEWIDTH;
-
 sub pp
 {
   local %seen;
@@ -118,13 +120,7 @@ sub pp
   $out;
 }
 
-sub dd {
-  say pp(@_);
-}
 
-sub ddx {
-  say ppx(@_);
-}
 
 
 sub Path::Tiny::selfpp($) {
@@ -310,7 +306,9 @@ BEGIN {
 
     my($class, $type, $id);
     my $strval = overload::StrVal($rval);
+#        eex([ $strval ] );
     # Parse $strval without using regexps, in order not to clobber $1, $2,...
+#        eex($strval);
     if ((my $i = rindex($strval, "=")) >= 0) {
       $class = substr($strval, 0, $i);
       $strval = substr($strval, $i+1);

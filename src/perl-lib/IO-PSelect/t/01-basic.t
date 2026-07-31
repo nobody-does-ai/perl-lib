@@ -10,5 +10,4 @@ BEGIN {
 
 use_ok('IO::PSelect') or BAIL_OUT('POSIX::At did not load');
 
-eex(
 done_testing();

@@ -6,7 +6,10 @@ use Nobody::Util;
 use Scalar::Util qw(blessed);
 use feature 'say';
 use overload ();
-our(@EXPORT)=qw(dd ddx ee eex pp ppx quote qquote loc);
+use vars qw( @sub @EXPORT );
+BEGIN {
+  @sub = qw(dd ddx ee eex pp ppx quote qquote loc);
+}
 use Nobody::Util;
 #    BEGIN { print Dumper(\%INC)."\n\n"; };
 use vars qw($VERSION $DEBUG @vars @EXPORT);
@@ -27,13 +30,15 @@ sub loc {
   } while($pkg eq 'Nobody::PP');
   join(':',$file,$line,"@_");
 };
-
-
-#    BEGIN {
-#      my(@sub)=
-#      eval "sub $_ { ; };";
-#      push(@EXPORT,@sub);
-#    };
+our(@test);
+BEGIN {
+  push(@test,"eex( qw( 1 2 3 4 5 ( (");
+};
+BEGIN {
+  for(@test) {
+    eex eval "$_";
+  };
+};
 #    
 #    
 #    BEGIN {

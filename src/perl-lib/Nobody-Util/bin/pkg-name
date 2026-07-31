@@ -1,0 +1,205 @@
+#!/usr/bin/perl
+BEGIN {
+  use feature 'say';
+  say STDERR "This is a test";
+};
+use common::sense;
+use Nobody::Util;
+$|++;
+use autodie ;
+use Nobody::PP qw( ddx eex ppx );
+use Nobody::Util;
+BEGIN {
+  use Data::Dumper;
+  say Dumper({EXPORT=>\@Nobody::PP::EXPORT});
+  say Dumper({EXPORT_OK=>\@Nobody::PP::EXPORT_OK});
+};
+use Getopt::WonderBra;
+use Carp qw(croak);
+STDOUT->autoflush(1);
+our(@VERSION)=qw( 0 1 0 );
+our(@xpre)=qw( python3 ruby );
+sub version {
+  local($")=".";
+  say "$0: @VERSION";
+};
+use subs qw( available installed removed manual deps );
+use vars qw(%opt $and $verbose);
+sub os() {
+  state($os,$like);
+  unless(defined($os)){
+    ($os,$like)=map { lc } map { split } qx(source /etc/os-release; echo "\$ID"; echo "\$ID_LIKE");
+    $os=$like unless length($os);
+    return $os;
+  };
+};
+my($os)=os;
+my($groups);
+BEGIN {
+  $groups=qr(^$);
+};
+$verbose=0;
+my (%pkg,@pkg);
+sub re
+{
+  sub regex(@) ;
+  my $re=regex(@ARGV);
+  ppx(\%opt);
+  for (keys %opt) {
+    my($val)=$opt{$_};
+    for( filter(main->$_ )) {
+      $pkg{$_}+=$val;
+    };
+  };
+  sub regex(@) {
+    my($re);
+    if(@_==0) {
+      return qr{.*};
+    };
+    return qr($_[0]) if @_==1;
+    if($and) {
+      $re=join("",map { "(?=.*$_)" } @_);
+      $re=qr($re);
+    } else {
+      require Regexp::Assemble;
+      my $ra = Regexp::Assemble->new;
+      $ra->add($_) for @_;
+      $re=$ra->re;
+    };
+    return qr($re);
+  };
+  return $re;
+};
+my($re)=re;
+@pkg = grep { $pkg{$_} } sort keys %pkg;
+sub ret {
+  local(@_)=@_;
+  my $c=[caller(1)]->[3];
+  s{^.*::}{} for $c;
+  local $,=" ";
+  say STDERR $c, scalar(@_), "matches" if $verbose;
+  wantarray ? @_ : \@_;
+};
+sub filter {
+  local(@_) = grep { /$re/ } @_;
+  @_ = grep { !m{$groups} } @_;
+  ret @_;
+};
+sub available() {
+  if($os eq "devuan" or $os eq "debian") {
+    chomp(@_=qx(apt-cache pkgnames));
+  } elsif( $os eq "alpine" ) {
+    chomp(@_=qx(apk list --available));
+    s{[-][0-9].*}{} for @_;
+  } else {
+    die "unknown: $os";
+  };
+  @_=sort @_;
+  ret @_;
+}
+sub auto {
+  local(@_)=sort map { split } qx(apt-mark showauto); 
+  @_=sort @_;
+  ret @_;
+};
+sub manual {
+  local(@_) = sort map { split } qx(apt-mark showmanual);
+  @_=sort @_;
+  ret @_;
+};
+sub installed {
+  local(@_);
+  if($os eq "devuan" or $os eq "debian") {
+    push(@_,auto());
+    push(@_,manual());
+  } elsif( $os eq "alpine" ) {
+    chomp(@_=qx(apk list --installed));
+    s{[-][0-9].*}{} for @_;
+  } else {
+    die "unknown: $os";
+  };
+  @_=sort @_;
+  ret @_;
+};
+sub removed {
+  local(@_)=map { [split] } grep { /^[a-z][a-z]/ } qx(dpkg -l);
+  my %seen = map { $_->[1], 1 } grep { $_->[0] ne 'ii' } @_;
+  @_ = keys %seen;
+  ret @_;
+};
+my(%def);
+
+INIT {
+  local($")="";
+  sub help {
+    say "$0 -[aiuIU]";
+    say "";
+    say "  list package names <regex+>";
+    say "   set:";
+    say "    -A: all ( print all sets )\n";
+    say "";
+    say "    -m: manual";
+    say "    -u: auto ( not explicitly installed, but installed )";
+    say "    -i: installed ( same as -um )";
+    say "    -r: removed (using dpkg -l) not purged";
+    say "";
+    say "  regex:";
+    say "    -a: and multi regexps (normally multple regexes are";
+    say "        treated as or)";
+    say "";
+    say "    -D: no default filters";
+    say "";
+  };
+  sub args {
+    my(%hand);
+    local(*_,$_)=\@ARGV;
+    $hand{'-a'}="available";
+    $hand{'-i'}="installed";
+    $hand{'-u'}="auto";
+    $hand{'-g'}=sub { $groups=eval join("","qr(^(",join("|",qw( libghc libjs golang rust librust elpa python3 node ruby lua php r-cran )),"))"); @_; };
+    $hand{'-m'}="manual";
+    $hand{'-r'}="removed";
+    $hand{'-R'}="reverse";
+    $hand{'-O'}="and";
+    $hand{'-A'}="or";
+    $hand{'-v'}="not";
+    my ($str)=join("",grep { s,^-,,; } sort keys %hand);
+    @_=getopt($str,@_);
+    my ($all,$rev);
+    while(($_=shift)ne'--'){
+      my($flag)=$_;
+      for($hand{$_}){
+        croak "no handler for '$flag'\n" unless defined;
+        if(ref($_) eq 'CODE') {
+          @_=$_->(@_);
+        } else {
+          if('and'eq$_){
+            die "both and and or given\n" if $and<0;
+            $and=1;
+          } elsif('or'eq$_){
+            die "both and and or given\n" if $and>0;
+            $and=-1;
+          } elsif('reverse'eq$_){
+            die "reverse given with available\n" if $opt{available};
+            $rev=1;
+          } else {
+            $opt{$_}=1;
+          };
+        };
+      };
+    };
+    $and=-1 unless defined $and;
+    $rev=0 unless defined $rev;
+    $opt{$_}=-1 for keys %opt;
+    if($rev) {
+      die "reverse with available\n" if defined $opt{available};
+      $opt{available}=1;
+    };
+    unless(keys %opt) {
+      $opt{available}=1;
+    };
+#        eex( \%opt );
+    return @_;
+  };
+  @ARGV=args(@ARGV);
+}

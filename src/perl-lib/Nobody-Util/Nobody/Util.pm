@@ -1,12 +1,12 @@
-#!/usr/bin/perl
+#    #!/usr/bin/perl
 # vim: ts=2 sw=2 ft=perl
 package Nobody::Util;
 use Data::Dumper;
-sub Nobody::PP::import {
-  print Dumper(\@EXPORT),"\n";
+require Nobody::PP;
+Nobody::PP->import(@Nobody::PP::EXPORT);
+BEGIN { 
+  STDERR->say($_) for @Nobody::PP::EXPORT;
 };
-use Nobody::PP;
-use Nobody::PP @Nobody::PP::EXPORT;
 BEGIN {
   our(@call);
   our(@key,@val)=qw(
@@ -25,7 +25,6 @@ use Carp::Always;
 use Carp;
 use Carp @Carp::EXPORT_OK;
 
-sub serdate(;$);
 sub paths {
   return map { path($_) } @_;
 };

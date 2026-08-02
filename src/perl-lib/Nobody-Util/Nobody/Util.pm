@@ -2,38 +2,11 @@
 # vim: ts=2 sw=2 ft=perl
 package Nobody::Util;
 our (@ISA,@EXPORT,@EXPORT_OK,%EXPORT_TAGS,%EXP);
+use Nobody::Deps;
 BEGIN {
   @ISA = qw(Exporter);
 };
 BEGIN { STDOUT->autoflush(1); }
-use common::sense;
-use Path::Tiny;
-use Nobody::PP;
-use Import::Into;
-my(%use);
-use Carp;
-use Carp @Carp::EXPORT_OK;
-sub serdate;
-my($count);
-BEGIN { $count=100 };
-sub find {
-  local(@_)=@_;
-  my(@r);
-  my(@d)=grep { -d $_[$_] } keys @_;
-  my(@f)=grep { !-d $_[$_] } keys @_;
-  @_=@_[@d,@f];
-  while(@_ and -d $_[0]){
-    local($_)=path(shift);
-    if(-d) {
-      my(@tmp)=$_->children();
-      unshift(@_,grep { -d } @tmp);
-      push(@_,grep { !-d } @tmp);
-    } else {
-      push(@_,$_);
-    };
-  };
-  @_;
-};
 sub add_use {
   die "usage: add_use(str,str)" unless @_==2;
   my($pkg)=shift;
@@ -62,6 +35,34 @@ BEGIN {
   add_use( common::sense=> '' );
   add_use( strict=>'' );
   add_use( warnings=>'' );
+};
+use common::sense;
+use Path::Tiny;
+use Nobody::PP;
+use Import::Into;
+my(%use);
+use Carp;
+use Carp @Carp::EXPORT_OK;
+sub serdate;
+my($count);
+BEGIN { $count=100 };
+sub find {
+  local(@_)=@_;
+  my(@r);
+  my(@d)=grep { -d $_[$_] } keys @_;
+  my(@f)=grep { !-d $_[$_] } keys @_;
+  @_=@_[@d,@f];
+  while(@_ and -d $_[0]){
+    local($_)=path(shift);
+    if(-d) {
+      my(@tmp)=$_->children();
+      unshift(@_,grep { -d } @tmp);
+      push(@_,grep { !-d } @tmp);
+    } else {
+      push(@_,$_);
+    };
+  };
+  @_;
 };
 BEGIN {
   if ($] >= 5.036) {

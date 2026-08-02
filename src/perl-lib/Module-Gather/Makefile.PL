@@ -6,8 +6,8 @@ use ExtUtils::MakeMaker;
 my %WriteMakefileArgs = (
     NAME             => 'Module::Gather',
     AUTHOR           => ['Rich Paul <rpaul@cpan.org>'],
-    VERSION_FROM     => 'Gather.pm',
-    ABSTRACT_FROM    => 'Gather.pm',
+    VERSION_FROM     => 'Module/Gather.pm',
+    ABSTRACT_FROM    => 'Module/Gather.pm',
     LICENSE          => 'artistic_2',
     MIN_PERL_VERSION => '5.008003',
     CONFIGURE_REQUIRES => {

@@ -1,22 +1,23 @@
 #!/usr/bin/perl
 # vim: ts=2 sw=2 ft=perl
 package Nobody::Path;
-use Nobody::PP qw(eex);
-use Nobody::Util;
+use Nobody::PP;
+use Exporter;
+our(@EXPORT);
+sub import {
+  goto \&Exporter::import
+}
+use Path::Tiny;
+use Path::Tiny ( @Path::Tiny::EXPORT_OK );
 BEGIN {
-  eex(\%INC);
-  eex(scalar(@Nobody::Util::EXPORT));
-  my(%key);
-  $key{$_}++for( keys %Nobody::Path:: );
+  push(@EXPORT, @Path::Tiny::EXPORT_OK, @Path::Tiny::EXPORT);
 };
-eex( \%INC );
-#use Data::Dumper;
-#BEGIN { print Dumper(\%INC)."\n\n"; };
-#
-#use Nobody::PP qw(eex);
-#use feature "say";
-#use Path::Tiny qw(path);
-#BEGIN {
-#say "HEY";
-#};
+sub Path::Tiny::selfpp($) {
+  my($rval)=shift;
+  return "path(".qquote($rval).")";
+}
+sub URI::selfpp($) {
+  my($rval)=shift;
+  return "uri(".qquote($rval).")";
+};
 1;

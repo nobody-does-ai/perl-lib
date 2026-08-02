@@ -1,5 +1,5 @@
 package Nobody::JSON;
-our @EXPORT    = qw( json );
+our @EXPORT    = qw( json jsonl );
 our @EXPORT_OK = qw( encode_json decode_json );
 our %EXPORT_TAGS = ( all => [ @EXPORT_OK ] );
 BEGIN {
@@ -32,6 +32,19 @@ INIT {
     $self;
   }; 
 };
+sub jsonl {
+  local(@_)=@_;
+  state($json);
+  unless(defined($json)){
+    my($class)=class(shift);
+    $json=JSON::XS->new;
+    $json->utf8;
+    $json->encode(1);
+    $json->canonical(1);
+    $json==bless([$json],$class);
+  };
+  $json;
+};
 sub json {
   local(@_)=@_;
   state($json);
@@ -47,7 +60,7 @@ sub load {
   );
   local(@_)=@_;
   my($self)=shift;
-  my($src)=shift;
+  my($src)=path(shift);
   my $txt=$src->slurp;
   my $obj=$self->decode($txt);
   $obj;
@@ -56,7 +69,7 @@ sub save {
   die "you can't do that!" unless safe_can($_[0],"save");
   my($self)=shift;
   die "too many args" if @_>2;
-  my($dst)=shift;
+  my($dst)=path(shift);
   local($_)=$self->encode($_[0]);
   $dst->spew($_);
 };

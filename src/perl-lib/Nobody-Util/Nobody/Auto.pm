@@ -3,7 +3,17 @@
 package Nobody::Auto;
 use Nobody::Util;
 use Nobody::PP;
-
+use Exporter;
+our(@ISA)=qw(Exporter);
+our(@EXPORT)=qw( this is a test );
+sub this {
+};
+sub is {
+};
+sub a {
+};
+sub test {
+}
 # Nobody::Auto - auto-install missing CPAN modules at runtime.
 #
 # Usage:

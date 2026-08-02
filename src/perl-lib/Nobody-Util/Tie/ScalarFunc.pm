@@ -1,25 +1,14 @@
 package Tie::ScalarFunc;
+use Nobody::Util;
 
-use Tie::Array;
-
-our(%self,$self);
-sub TieScalar {
-  my($class)=class(shift);
-  local(%self);
-  while(@_){
-    local($_,@_)=@_;
-    if(ref){
-      if('HASH' eq reftype($_)){
-        unshift(@_,%$_);
-      } else {
-        die "bad ref: ",ppx($_);
-      };
-    } else {
-      $self{$_}=shift;
-    };
-  };
-  die "no fetch: ".pp(\%self) unless $self{fet};
+sub TIESCALAR {
+  my($class,$fetch,$store)=@_;
+  my(%self) = { fetch=>shift, store=>$store };
   bless(\%self,$class);
+};
+sub FETCH {
+  my($self)=shift;
+  $self->{fetch}();
 };
 
 1

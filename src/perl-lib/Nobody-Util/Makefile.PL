@@ -13,6 +13,7 @@ WriteMakefile(
         'Scalar::Util'  => 0,
         'List::Util'    => 1.45,
         'POSIX'         => 0,
+        'POSIX::At'     => 0,
         'Carp'          => 0,
         'Path::Tiny'    => 0,
         'Sub::Util'     => 0,

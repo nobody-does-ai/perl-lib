@@ -2,19 +2,21 @@
   package Nobody::PP;
   require Exporter;
   our(
-    $DEBUG,   $INDENT,  $LINEWIDTH,  $TRY_BASE64,  $VERSION,  %refcnt,  %require,  %seen,
-    @EXPORT,  @dump,    @fixup,      @sub,         @vars,     $enter,              
+      $DEBUG,  $INDENT,  $LINEWIDTH,  $TRY_BASE64,  $VERSION,
+      $enter,  %refcnt,  %require,    %seen,        @EXPORT,
+      @dump,   @fixup,   @sub,        @vars,        
   );
   BEGIN {
     @sub = qw(dd ddx ee eex pp ppx quote qquote loc);
     push(@Nobody::PP::EXPORT,@sub);
     sub import {
+#          eex(\@EXPORT, \@EXPORT_OK);
       goto \&Exporter::import;
     };
   };
+  use overload ();
   use FindBin qw($RealBin);
   use Scalar::Util qw(blessed);
-  use overload ();
   sub ppx { loc(pp(@_)); };
   sub dd { say STDOUT pp(@_); };
   sub ee { say STDERR pp(@_); };
@@ -22,7 +24,6 @@
   sub eex { say STDERR ppx(@_); };
   sub loc {
     my($idx)=0;
-    say STDERR "@_";
     my($pkg, $file, $line);
     my(@frame);
     do {

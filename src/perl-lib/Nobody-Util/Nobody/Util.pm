@@ -1,48 +1,23 @@
 #!/usr/bin/perl
 # vim: ts=2 sw=2 ft=perl
 package Nobody::Util;
-our (@ISA,@EXPORT,@EXPORT_OK,%EXPORT_TAGS,%EXP);
-use Nobody::Deps;
+our (@ISA,@EXPORT,@EXPORT_OK,%EXPORT);
 BEGIN {
-  @ISA = qw(Exporter);
+  use Nobody::Deps;
+}
+BEGIN {
+  use Nobody::PP;
+};
+BEGIN {
+  use Data::Dumper;
+  use FindBin;
+};
+BEGIN {
+  use Nobody::PP;
+  use Nobody::Path;
 };
 BEGIN { STDOUT->autoflush(1); }
-sub add_use {
-  die "usage: add_use(str,str)" unless @_==2;
-  my($pkg)=shift;
-  die "$pkg done" if defined $use{$pkg};
-  $use{$pkg}=shift;
-  eval "use $pkg";
-  my(@arr)=eval "$use{$pkg}";
-  push(@EXPORT,@arr);
-  for( "use $pkg $use{$pkg};" ) {
-    eval;
-    warn "($_)\n$@" if "$@";
-  };
-};
-BEGIN {
-  no strict 'subs';
-  add_use( Fcntl        =>   '@Fcntl::EXPORT_OK' );
-  add_use( File::stat   =>   '@File::stat::EXPORT_OK' );
-  add_use( FindBin  =>    'qw( $Bin $RealBin $Script $RealScript $Dir )' );
-  add_use( Import::Into => '@Import::Into::EXPORT_OK' );
-  add_use( List::Util   => '@List::Util::EXPORT_OK' );
-  add_use( Nobody::PP => '@Nobody::PP::EXPORT_OK' );
-  add_use( POSIX        =>   'qw( strftime mktime ) ' );
-  add_use( Path::Tiny   =>   'qw( path ) ' );
-  add_use( Scalar::Util => '@Scalar::Util::EXPORT_OK' );
-  add_use( Sub::Util    => '( grep { $_ ne "set_prototype" } @Sub::Util::EXPORT_OK )' );
-  add_use( common::sense=> '' );
-  add_use( strict=>'' );
-  add_use( warnings=>'' );
-};
-use common::sense;
-use Path::Tiny;
-use Nobody::PP;
-use Import::Into;
 my(%use);
-use Carp;
-use Carp @Carp::EXPORT_OK;
 sub serdate;
 my($count);
 BEGIN { $count=100 };
@@ -64,63 +39,7 @@ sub find {
   };
   @_;
 };
-BEGIN {
-  if ($] >= 5.036) {
-    warnings->unimport('experimental::builtin');
-  }
-}
 
-our $VERSION = '0.01';
-
-# ---------------------------------------------------------------------------
-# Exporter setup
-# ---------------------------------------------------------------------------
-require Exporter;
-BEGIN {
-  push(@EXPORT , qw(
-    avg         basename    child_wait  class
-    deparse     dirname     file_id     flatten
-    getcwd      getfds      getfl       lcmp
-    lsort       max         maybeRef    methods
-    methods_via min         mkref       nonblock
-    open_fds    pad         pasteLines  safe_blessed
-    safe_can    safe_isa    serdate     serial_maker
-    setfl       sum         uniq        uri
-    vcmp        vsort exports
-    path pp ppx dd ddx ee eex
-    ));
-}
-
-# Re-export everything available from these modules.
-# The @Module::EXPORT_OK pattern is self-maintaining: if upstream adds
-# a new function, it automatically becomes available here.
-sub exports {
-  return { exports(@_) } unless wantarray;
-  my($pkg)=shift;
-  unless(defined($pkg)) {
-    my(@inc);
-    @inc=grep { s{/}{::}g and s{.pm$}{}; } keys %INC;
-    exports($_) for @inc;
-  };
-  die "usage: exports('pkg_name')" unless !@_;
-  no strict 'refs';
-  $EXP{$pkg}={
-    EXPORT=>\@{${$pkg.'::'}{EXPORT}},
-    EXPORT_OK=>\@{${$pkg.'::'}{EXPORT_OK}},
-    EXPORT_TAGS=>\%{${$pkg.'::'}{EXPORT_TAGS}}
-  };
-  return defined($pkg)?($pkg=>$EXP{$pkg}):(%EXP);
-};
-BEGIN {
-  @EXPORT_OK=@EXPORT;
-  %EXPORT_TAGS = ( all => [ @EXPORT_OK ] );
-  require Exporter;
-};
-sub import {
-  use Import::Into;
-  shift->export_to_level(1);
-  common::sense->import::into(1);
-};
 
 
 # ---------------------------------------------------------------------------
@@ -136,17 +55,6 @@ sub open_fds(;$) {
     my $no = fileno($dir);
     grep { $_ ne '.' && $_ ne '..' && ($no - $_) } readdir($dir);
   }
-}
-
-sub getfds() {
-  opendir(my $dir, "/proc/self/fd");
-  my $no = fileno($dir);
-  my @fds;
-  while (readdir($dir)) {
-    push @fds, $_;
-  }
-  closedir($dir);
-  return grep { $_ != $no } @fds;
 }
 
 sub getcwd {
@@ -420,7 +328,6 @@ sub print_methods {
   require mro;
   ddx(methods(ref($_[0])));
 }
-
 1;
 
 =head1 NAME

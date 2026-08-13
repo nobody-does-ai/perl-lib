@@ -3,12 +3,12 @@
 package Nobody::Path;
 use Nobody::PP;
 use Exporter;
-our(@EXPORT);
+our(@EXPORT,@EXPORT_OK);
+BEGIN { *EXPORT=\@EXPORT_OK };
 sub import {
   goto \&Exporter::import
 }
 use Path::Tiny;
-use Path::Tiny ( @Path::Tiny::EXPORT_OK );
 BEGIN {
   push(@EXPORT, @Path::Tiny::EXPORT_OK, @Path::Tiny::EXPORT);
 };

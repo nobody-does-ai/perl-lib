@@ -1,0 +1,13 @@
+[.]tar$
+[.]tar[.]gz$
+[.]tgz$
+[0-9]/
+tmp$
+MAKEFILE$
+[.]bak$
+[.]exists$
+blib/
+pm_to_blib$
+Makefile$
+META[.]json
+bin

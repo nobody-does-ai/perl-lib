@@ -1,9 +1,9 @@
 MAKEFLAGS+=-rR
 subs:=
-subs+= Exception-ThrowUnless
+#subs+= Exception-ThrowUnless
 #subs+= Getopt-WonderBra
 subs+= IO-PSelect
-subs+= LWP-Protocol-virtual
+#subs+= LWP-Protocol-virtual
 subs+= Module-Gather
 subs+= Symbol-Slots
 subs+= Unicode-NoFancyPants
@@ -30,6 +30,9 @@ $(builds): %_build: % %/Makefile
 	cd $(patsubst %_build,%,$@) && make
 	cd $(patsubst %_build,%,$@) && make test
 	cd $(patsubst %_build,%,$@) && make install
+
+manifest: $(MAKEFILES)
+	for i in $(subs); do bash -c "cd $$i && make manifest"; done
 
 build: $(builds)
 

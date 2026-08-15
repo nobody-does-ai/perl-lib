@@ -28,7 +28,7 @@ $(builds): %_build: % %/Makefile %/MANIFEST config
 	cd $(patsubst %_build,%,$@) && make install
 
 $(MAKEFILES): %/Makefile: %/Makefile.PL
-	cd $(dir $@) && perl -Mlocal::lib=/opt Makefile.pl
+	cd $(dir $@) && perl -Mlocal::lib=/opt Makefile.PL
 
 
 $(MANIFESTS): %/MANIFEST: %/Makefile

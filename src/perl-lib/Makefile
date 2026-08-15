@@ -26,7 +26,6 @@ ${MAKE} -C Nobody::Util;
 config: $(makefiles)
 
 $(builds): %_build: % %/Makefile
-	cpanm Nobody::Util
 	cd $(patsubst %_build,%,$@) && make
 	cd $(patsubst %_build,%,$@) && make test
 	cd $(patsubst %_build,%,$@) && make install

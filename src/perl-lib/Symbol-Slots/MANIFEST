@@ -1,0 +1,10 @@
+.gitignore
+GNUmakefile
+Makefile.PL
+MANIFEST			This list of files
+MANIFEST.SKIP
+MYMETA.yml
+Slots.pm
+Slots.xs
+t/00-basic.t
+t/01-tests.t

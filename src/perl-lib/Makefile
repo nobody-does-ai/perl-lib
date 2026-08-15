@@ -32,6 +32,7 @@ $(builds): %_build: % %/Makefile
 	cd $(patsubst %_build,%,$@) && make install
 
 manifest: $(MAKEFILES)
+	rm -f $(MAKEFILES:Makefile=MANIFEST)
 	for i in $(subs); do bash -c "cd $$i && make manifest"; done
 
 build: $(builds)

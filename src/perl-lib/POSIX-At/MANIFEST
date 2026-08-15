@@ -4,11 +4,9 @@ At.pm
 Changes
 eg/at_hardlink.pl
 eg/rsync_at.pl
-GNUmakefile
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
-MYMETA.yml
 POSIX/At.pm
 POSIX/Structs.pm
 README

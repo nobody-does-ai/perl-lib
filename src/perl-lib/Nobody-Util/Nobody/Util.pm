@@ -2,6 +2,7 @@
 # vim: ts=2 sw=2 ft=perl
 package Nobody::Util;
 our (@ISA,@EXPORT,@EXPORT_OK,%EXPORT);
+our ($VERSION)="0.5.0";
 BEGIN {
   use Nobody::Deps;
 }

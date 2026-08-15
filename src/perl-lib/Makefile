@@ -1,38 +1,38 @@
 MAKEFLAGS+=-rR
 subs:=
 #subs+= Exception-ThrowUnless
-#subs+= Getopt-WonderBra
+subs+= Getopt-WonderBra
 #subs+= IO-PSelect
 #subs+= LWP-Protocol-virtual
 subs+= Module-Gather
 subs+= Symbol-Slots
 subs+= Unicode-NoFancyPants
 subs+= POSIX-At
-#subs+= Nobody-Util
+subs+= Nobody-Util
 export subs
-MAKEFILES:=$(PATSUBST %,%/Makefile,$(subs))
+
+MAKEFILES:=$(patsubst %,%/Makefile,$(subs))
+MANIFESTS:=$(patsubst %,%/MANIFEST,$(subs))
+
 builds:=	$(patsubst %,%_build,$(subs))
-PERL5LIB:=$(PWD)/Nobody-Util:$(PERL5LIB)
 export PERL5LIB
 
 all: stow
 base=$(shell cd ../.. && pwd)
 
-$(MAKEFILES): %/Makefile: %/Makefile.PL
-	cd $(dir $@) && perl -Mlocal::lib=$(base) Makefile.PL INSTALLDIRS=perl
-	${MAKE} -C Nobody-Util all
-${MAKE} -C Nobody::Util; 
+config: $(MAKEFILES) $(MANIFESTS)
 
-config: $(makefiles)
-
-$(builds): %_build: % %/Makefile
+$(builds): %_build: % %/Makefile %/MANIFEST config
 	cd $(patsubst %_build,%,$@) && make
 	cd $(patsubst %_build,%,$@) && make test
 	cd $(patsubst %_build,%,$@) && make install
 
-manifest: $(MAKEFILES)
-	rm -f $(MAKEFILES:Makefile=MANIFEST)
-	for i in $(subs); do bash -c "cd $$i && make manifest"; done
+$(MAKEFILES): %/Makefile: %/Makefile.PL
+	cd $(dir $@) && perl -Mlocal::lib=/opt Makefile.pl
+
+
+$(MANIFESTS): %/MANIFEST: %/Makefile
+	cd $(dir $@) && make manifest
 
 build: $(builds)
 

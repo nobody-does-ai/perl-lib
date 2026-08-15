@@ -12,18 +12,6 @@ my %WriteMakefileArgs = (
   "DISTNAME" => "Unicode-NoFancyPants",
   "LICENSE" => "perl",
   "MIN_PERL_VERSION" => "5.022",
-  "NAME" => "Unicode::NoFancyPants",
-  "PREREQ_PM" => {
-    "Data::Dumper" => "2.173",
-    "Getopt::WonderBra" => 0,
-    "JSON::PP" => "4.05",
-    "LWP::UserAgent" => "6.49",
-    "Path::Tiny" => "0.108",
-    "Scalar::Util" => "1.55",
-    "Test::MockObject" => 0,
-    "common::sense" => "3.75"
-  },
-  "VERSION" => "0.001",
   "test" => {
     "TESTS" => "t/*.t"
   }

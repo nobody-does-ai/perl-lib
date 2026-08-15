@@ -1,7 +1,6 @@
 ebug
 *[0-9]/
-*.tar.gz
-MANIFEST
-Makefile
-blib
-pm_to_blib
+*.tar.gz$
+Makefile$
+blib$
+pm_to_blib$

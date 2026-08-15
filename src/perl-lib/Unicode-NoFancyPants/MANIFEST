@@ -1,6 +1,5 @@
 .gitignore
 dist.ini
-GNUmakefile
 lib/Unicode/NoFancyPants.pm
 LICENSE
 Makefile.PL

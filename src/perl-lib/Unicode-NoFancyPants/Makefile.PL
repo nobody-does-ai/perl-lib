@@ -9,9 +9,6 @@ use ExtUtils::MakeMaker;
 my %WriteMakefileArgs = (
   "ABSTRACT" => "Remove fancy Unicode characters, replacing them with ASCII equivalents.",
   "AUTHOR" => "Nobody <nobody\@turing-trust.com>",
-  "CONFIGURE_REQUIRES" => {
-    "ExtUtils::MakeMaker" => 0
-  },
   "DISTNAME" => "Unicode-NoFancyPants",
   "LICENSE" => "perl",
   "MIN_PERL_VERSION" => "5.022",
@@ -32,26 +29,5 @@ my %WriteMakefileArgs = (
   }
 );
 
-
-my %FallbackPrereqs = (
-  "Data::Dumper" => "2.173",
-  "Getopt::WonderBra" => 0,
-  "JSON::PP" => "4.05",
-  "LWP::UserAgent" => "6.49",
-  "Path::Tiny" => "0.108",
-  "Scalar::Util" => "1.55",
-  "Test::MockObject" => 0,
-  "common::sense" => "3.75"
-);
-
-
-unless ( eval { ExtUtils::MakeMaker->VERSION(6.63_03) } ) {
-  delete $WriteMakefileArgs{TEST_REQUIRES};
-  delete $WriteMakefileArgs{BUILD_REQUIRES};
-  $WriteMakefileArgs{PREREQ_PM} = \%FallbackPrereqs;
-}
-
-delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
-  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
 
 WriteMakefile(%WriteMakefileArgs);

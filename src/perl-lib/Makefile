@@ -1,14 +1,14 @@
 MAKEFLAGS+=-rR
 subs:=
 subs+= Exception-ThrowUnless
-subs+= Getopt-WonderBra
+#subs+= Getopt-WonderBra
 subs+= IO-PSelect
 subs+= LWP-Protocol-virtual
 subs+= Module-Gather
 subs+= Symbol-Slots
 subs+= Unicode-NoFancyPants
 subs+= POSIX-At
-subs+= Nobody-Util
+#subs+= Nobody-Util
 export subs
 MAKEFILES:=$(PATSUBST %,%/Makefile,$(subs))
 builds:=	$(patsubst %,%_build,$(subs))
@@ -17,6 +17,7 @@ export PERL5LIB
 
 all: stow
 base=$(shell cd ../.. && pwd)
+
 $(MAKEFILES): %/Makefile: %/Makefile.PL
 	cd $(dir $@) && perl -Mlocal::lib=$(base) Makefile.PL INSTALLDIRS=perl
 	${MAKE} -C Nobody-Util all

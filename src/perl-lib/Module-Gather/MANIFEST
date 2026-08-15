@@ -3,6 +3,7 @@ Changes
 Gather.pm
 ignore.txt
 Makefile.PL
+MANIFEST
 MANIFEST.SKIP
 Module/Gather.pm
 MYMETA.yml

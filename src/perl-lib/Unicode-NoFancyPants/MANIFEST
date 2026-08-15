@@ -1,11 +1,13 @@
+.gitignore
 dist.ini
 GNUmakefile
 lib/Unicode/NoFancyPants.pm
 LICENSE
 Makefile.PL
 MANIFEST
+MANIFEST.SKIP
 META.yml
+MYMETA.yml
 README
 t/001-basic.t
 tools/prereq/Dockerfile
-Unicode-NoFancyPants-0.001.tar.gz

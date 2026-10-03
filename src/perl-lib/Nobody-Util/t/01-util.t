@@ -1,6 +1,7 @@
 use strict;
 use warnings;
-use Test::More;
+  use File::Temp qw(tempdir);
+use Test::More qw( tests 10 );
 use lib 't/lib', 'lib';
 
 use_ok('Nobody::Util');
@@ -19,8 +20,7 @@ like($d, qr/^\d{8}-\d{6}$/, 'serdate: returns YYYYMMDD-HHMMSS string');
 
 # serial_maker — expects { fmt => $sprintf_fmt, ... }
 {
-  use File::Temp qw(tempdir);
-  my $dir = tempdir(CLEANUP => 1);
+  my $dir = Nobody::Path::tempdir(CLEANUP => 1);
   my $ser = serial_maker({ fmt => "$dir/test-%04d.txt" });
   my $r1 = $ser->();
   my $r2 = $ser->();
@@ -65,4 +65,3 @@ is(min(3, 1, 2), 1, 'min: finds minimum value');
 is(max(3, 1, 2), 3, 'max: finds maximum value');
 is_deeply([uniq(1, 2, 1, 3, 2)], [1, 2, 3], 'uniq: finds unique elements');
 
-done_testing();

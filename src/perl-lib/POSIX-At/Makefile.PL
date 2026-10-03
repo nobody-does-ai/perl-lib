@@ -1,8 +1,6 @@
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
-my(@missing) = grep { !-f } map { split } qx(cat MANIFEST);
-die "missing @missing" if @missing;
 
 WriteMakefile(
   NAME         => 'POSIX::At',
@@ -23,9 +21,4 @@ WriteMakefile(
     # 'Nobody::Util' => 0,
   },
 
-  META_MERGE => {
-    resources => {
-      repository => 'https://gitlab.com/PopeNobody/posix-at',
-    },
-  },
 );

@@ -5,17 +5,19 @@ our (@ISA,@EXPORT,@EXPORT_OK,%EXPORT);
 our ($VERSION)="0.5.0";
 BEGIN {
   use Nobody::Deps;
+  use Nobody::Deps (@Nobody::Deps::EXPORT_OK);
 }
 BEGIN {
   use Nobody::PP;
+  use Nobody::PP (@Nobody::PP::EXPORT_OK);
 };
 BEGIN {
   use Data::Dumper;
   use FindBin;
 };
 BEGIN {
-  use Nobody::PP;
   use Nobody::Path;
+  use Nobody::Path (@Nobody::Path::EXPORT_OK);
 };
 BEGIN { STDOUT->autoflush(1); }
 my(%use);

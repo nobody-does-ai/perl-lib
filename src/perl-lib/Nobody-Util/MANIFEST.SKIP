@@ -8,6 +8,8 @@ Save-Nobody/UtilOld.pm
 ^MYMETA\.yml$
 ^MYMETA\.json$
 [.]bak$
-^[.]x$
-blib/.*
+[.]x$
+blib
 _build
+Nobody
+Tie

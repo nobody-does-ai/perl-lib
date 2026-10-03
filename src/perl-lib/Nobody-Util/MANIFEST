@@ -9,14 +9,6 @@ _build/notes
 _build/prereqs
 _build/runtime_params
 bin/pkg-name
-blib/arch/.exists
-blib/arch/auto/Nobody/Util/.exists
-blib/bin/.exists
-blib/lib/auto/Nobody/Util/.exists
-blib/lib/Nobody/.exists
-blib/man1/.exists
-blib/man3/.exists
-blib/script/.exists
 Build
 Build.PL
 Changes

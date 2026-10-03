@@ -9,3 +9,4 @@ Save-Nobody/UtilOld.pm
 ^MYMETA\.json$
 [.]bak$
 ^[.]x$
+blib/.*

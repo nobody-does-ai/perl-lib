@@ -1,13 +1,4 @@
 .gitignore
-_build/auto_features
-_build/build_params
-_build/cleanup
-_build/config_data
-_build/features
-_build/magicnum
-_build/notes
-_build/prereqs
-_build/runtime_params
 bin/pkg-name
 Build
 Build.PL
@@ -22,8 +13,6 @@ lib/Nobody/Path.pm
 lib/Nobody/Pipe.pm
 lib/Nobody/PP.pm
 lib/Nobody/Util.pm
-lib/Nobody/UtilNew.pm
-lib/Nobody/UtilOld.pm
 lib/Nobody/Wrapper.pm
 lib/Tie/ArrayNoNull.pm
 lib/Tie/ScalarFunc.pm
@@ -38,9 +27,3 @@ README.md
 t/01-util.t
 t/02-json.t
 test.pl
-Tie/.x
-Tie/ArrayNoNull.pm
-Tie/ScalarFunc.pm
-Tie/Snitch.pm
-Tie/StdArray.pm
-Tie/StdHash.pm

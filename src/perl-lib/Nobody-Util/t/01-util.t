@@ -1,7 +1,7 @@
 use strict;
 use warnings;
   use File::Temp qw(tempdir);
-use Test::More qw( tests 10 );
+use Test::More;
 use lib 't/lib', 'lib';
 
 use_ok('Nobody::Util');
@@ -64,4 +64,4 @@ is(sum(1, 2, 3), 6, 'sum: calculates sum');
 is(min(3, 1, 2), 1, 'min: finds minimum value');
 is(max(3, 1, 2), 3, 'max: finds maximum value');
 is_deeply([uniq(1, 2, 1, 3, 2)], [1, 2, 3], 'uniq: finds unique elements');
-
+ done_testing;

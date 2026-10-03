@@ -5,7 +5,6 @@ Changes
 lib/Nobody/Auto.pm
 lib/Nobody/Deps.pm
 lib/Nobody/Exes.pm
-lib/Nobody/Export.pm
 lib/Nobody/JSON.pm
 lib/Nobody/MimeMail.pm
 lib/Nobody/Path.pm

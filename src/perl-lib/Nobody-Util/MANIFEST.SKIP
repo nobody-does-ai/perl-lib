@@ -3,5 +3,5 @@
 ^MYMETA\.json$
 ^[.]bak$
 ^[.]x$
-^blib$
-^_build$
+^blib/
+^_build/

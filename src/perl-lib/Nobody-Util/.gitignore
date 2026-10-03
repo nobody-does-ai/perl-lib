@@ -1,1 +1,3 @@
 !lib
+_build
+*.bak

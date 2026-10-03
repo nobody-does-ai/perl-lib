@@ -1,0 +1,11 @@
+Save-Nobody/Auto.pm
+Save-Nobody/JSON.pm
+Save-Nobody/PP.pm
+Save-Nobody/Path.pm
+Save-Nobody/Util.pm
+Save-Nobody/UtilNew.pm
+Save-Nobody/UtilOld.pm
+^MYMETA\.yml$
+^MYMETA\.json$
+[.]bak$
+^[.]x$

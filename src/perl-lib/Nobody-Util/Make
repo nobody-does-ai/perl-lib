@@ -1,0 +1,17 @@
+
+BASE:=$(shell cd ../../.. && pwd)
+PCMD:=perl -Mlocal::lib=$(BASE)
+stow: install
+	bash -c "cd $(BASE) && cd .. && /usr/bin/stow perl-lib"
+
+install: test
+	$(PCMD) Build
+
+test: build
+	$(PCMD) Build test
+
+build: first
+	$(PCMD) Build install
+
+first:
+	rm -fr blib

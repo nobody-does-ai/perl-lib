@@ -1,17 +1,23 @@
+#!/usr/bin/make -f
 
 BASE:=$(shell cd ../../.. && pwd)
 PCMD:=perl -Mlocal::lib=$(BASE)
+
 stow: install
+	echo "make stow"
 	bash -c "cd $(BASE) && cd .. && /usr/bin/stow perl-lib"
 
 install: test
-	$(PCMD) Build
+	echo "make install"
+	$(PCMD) Build install
 
 test: build
+	echo "make build"
 	$(PCMD) Build test
 
 build: first
-	$(PCMD) Build install
+	echo "make first"
+	$(PCMD) Build
 
 first:
 	rm -fr blib

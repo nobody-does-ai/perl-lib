@@ -15,10 +15,11 @@ sub new {
 };
 sub run {
 	my($self)=shift;
-	my(@pipe)=@{$self};
-	for(@pipe) {
-		say;
-	};
+	my(@pipe)=[@{$self}];
+  for(keys @pipe){
+    pipe(my $r,my $w);
+    eex([$r,$w]);
+  };
 };
 
 unless(caller){

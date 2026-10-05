@@ -2,10 +2,12 @@
 Build
 Build.PL
 Changes
+GNUmakefile
 lib/Nobody/Auto.pm
 lib/Nobody/Deps.pm
 lib/Nobody/Exes.pm
 lib/Nobody/JSON.pm
+lib/Nobody/Load.pm
 lib/Nobody/MimeMail.pm
 lib/Nobody/Path.pm
 lib/Nobody/Pipe.pm
@@ -14,9 +16,9 @@ lib/Nobody/Util.pm
 lib/Nobody/Wrapper.pm
 lib/Tie/ArrayNoNull.pm
 lib/Tie/ScalarFunc.pm
-lib/Tie/Snitch.pm
 lib/Tie/StdArray.pm
 lib/Tie/StdHash.pm
+Make
 MANIFEST			This list of files
 MANIFEST.bak
 MANIFEST.SKIP
@@ -24,4 +26,5 @@ README
 README.md
 t/01-util.t
 t/02-json.t
+t/03-array-no-null.t
 test.pl

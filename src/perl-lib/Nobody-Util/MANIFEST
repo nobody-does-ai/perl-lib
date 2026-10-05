@@ -20,7 +20,6 @@ lib/Tie/StdArray.pm
 lib/Tie/StdHash.pm
 Make
 MANIFEST			This list of files
-MANIFEST.bak
 MANIFEST.SKIP
 README
 README.md

@@ -5,3 +5,4 @@
 ^[.]x$
 ^blib/
 ^_build/
+[.]bak$

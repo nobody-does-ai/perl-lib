@@ -36,16 +36,17 @@ BEGIN {
 sub get_exports {
   state($code);
   $code//=join( "", qw( package $_[0]; [@EXPORT],[@EXPORT_OK] ) );
+  say($code);
   eval($code);
 };
 sub add_exports(@){
   local($_,@_)=@_;
   push(@{($PKG{$_}//=[])},qw());
-  sub add_pkg($;$) {
-    my($name)=shift;
-    require($name);
-  };
 }
+sub add_pkg($;$) {
+  my($name)=shift;
+  require($name);
+};
 sub colon_pkg {
   join("::",split(m{/|.pm$}));
 };

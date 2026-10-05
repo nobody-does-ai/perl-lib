@@ -1,12 +1,13 @@
 #!/usr/bin/perl
 # vim: ts=2 sw=2 ft=perl
 package Nobody::Util;
-BEGIN {
-  push(@PKG,qw( Data::Dumper FindBin Nobody::Path  ));
-  use Nobody::Load @PKG;
-  use Nobody::Deps;
-};
-our (@SUBS,@PKG);
+use Nobody::Deps;
+#    BEGIN {
+#      push(@PKG,qw( Data::Dumper FindBin Nobody::Path  ));
+#      use Nobody::Load @PKG;
+#      use Nobody::Deps;
+#    };
+#    our (@SUBS,@PKG);
 our ($VERSION)="0.5.0";
 BEGIN { STDOUT->autoflush(1); }
 my(%use);

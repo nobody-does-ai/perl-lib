@@ -1,9 +1,8 @@
 #!/usr/bin/perl
 # vim: ts=2 sw=2 ft=perl
 #
-package Nobody::Util;
+use base qw( Nobody::Base );
 BEGIN {
-  require Exporter;
   sub import;
   sub import {
     require Import::Into;
@@ -60,7 +59,7 @@ add_use(  Import::Into     =>  'exports');
 add_use(  List::Util       =>  'exports');                                                                                        
 add_use(  POSIX            =>  'qw(strftime  mktime)');                                              
 add_use(  Scalar::Util     =>  'exports');                                                                                        
-#    add_use(  Sub::Util        =>  'exports');
+add_use(  Sub::Util        =>  'exports');
 add_use(  common::sense=>  ''  );                                                                                                                    
 add_use(  strict=>''       );                                                                                                                        
 add_use(  warnings=>''     );                                                                                                                        

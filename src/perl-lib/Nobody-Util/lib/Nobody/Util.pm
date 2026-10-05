@@ -1,27 +1,16 @@
 #!/usr/bin/perl
 # vim: ts=2 sw=2 ft=perl
 package Nobody::Util;
-our (@ISA,@EXPORT,@EXPORT_OK,%EXPORT);
-our ($VERSION)="0.5.0";
 BEGIN {
+  push(@PKG,qw( Data::Dumper FindBin Nobody::Path  ));
+  use Nobody::Load @PKG;
   use Nobody::Deps;
-  use Nobody::Deps (@Nobody::Deps::EXPORT_OK);
-}
-BEGIN {
-  use Nobody::PP;
-  use Nobody::PP (@Nobody::PP::EXPORT_OK);
 };
-BEGIN {
-  use Data::Dumper;
-  use FindBin;
-};
-BEGIN {
-  use Nobody::Path;
-  use Nobody::Path (@Nobody::Path::EXPORT_OK);
-};
+our (@SUBS,@PKG);
+our ($VERSION)="0.5.0";
 BEGIN { STDOUT->autoflush(1); }
 my(%use);
-sub serdate;
+sub serdate(;$);
 my($count);
 BEGIN { $count=100 };
 sub find {
@@ -233,11 +222,6 @@ sub file_id {
   return sprintf("%016x:%016x", $st_dev, $st_ino);
 }
 
-sub uri {
-  eval 'require URI';
-  die "$@" if "$@";
-  return URI->new($_[0]);
-}
 
 # ---------------------------------------------------------------------------
 # Serial file/directory maker
@@ -353,7 +337,7 @@ of Perl development by Rich Paul (CPAN: NOBODY).  It is, as the name
 suggests, full of things that nobody else does — but that save time.
 
 The module re-exports commonly needed symbols from C<Carp>, C<List::Util>,
-C<Scalar::Util>, C<Sub::Util>, C<POSIX>, C<Fcntl>, C<Path::Tiny>, and
+C<Scalar::Util>, C<Sub::Util>, C<POSIX>, C<Fcntl>, C<Nobody::Path>, and
 C<FindBin> so that most scripts need only C<use Nobody::Util> to get a
 useful working environment.
 

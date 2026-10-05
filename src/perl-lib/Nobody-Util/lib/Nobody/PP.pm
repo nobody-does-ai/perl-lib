@@ -18,11 +18,11 @@
   use FindBin qw($RealBin);
   use Scalar::Util qw(blessed);
   sub ppx { loc(pp(@_)); };
-  sub dd { say STDOUT pp(@_); };
-  sub ee { say STDERR pp(@_); };
-  sub ddx { say STDOUT ppx(@_); };
-  sub eex { say STDERR ppx(@_); };
-  sub loc {
+  sub dd { local(@_)=@_;  say STDOUT pp(@_); };
+  sub ee { local(@_)=@_;  say STDERR pp(@_); };
+  sub ddx { local(@_)=@_; say STDOUT ppx(@_); };
+  sub eex { local(@_)=@_; say STDERR ppx(@_); };
+  sub loc { local(@_)=@_;
     my($idx)=0;
     my($pkg, $file, $line);
     my(@frame);
